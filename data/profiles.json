@@ -1,0 +1,68 @@
+{
+    "$schema_description": "Defines contextual risk weights, exposure and service-criticality attributes for automated vulnerability prioritization triage. Conforms to the 'Personalised Vulnerability Triage' 24-hour challenge brief (context fields: technology stack, exposure, service, importance).",
+    "organizations": [
+        {
+            "org_id": "ORG-001",
+            "name": "Global Retail Bank",
+            "sector": "Financial Services",
+            "risk_appetite": "Low",
+            "exposure": "Internet-facing",
+            "service_importance": "Critical",
+            "weight_modifiers": {
+                "cvss_weight": 0.3,
+                "cisa_kev_weight": 0.45,
+                "first_epss_weight": 0.25
+            },
+            "critical_products": [
+                "Core Banking Framework",
+                "Identity Provider SaaS"
+            ],
+            "business_services": {
+                "Core Banking Framework": "core banking platform",
+                "Identity Provider SaaS": "customer & staff identity login"
+            }
+        },
+        {
+            "org_id": "ORG-002",
+            "name": "Agile Cloud Tech Startup",
+            "sector": "Technology",
+            "risk_appetite": "High",
+            "exposure": "internet-facing",
+            "service_importance": "High",
+            "weight_modifiers": {
+                "cvss_weight": 0.2,
+                "cisa_kev_weight": 0.2,
+                "first_epss_weight": 0.6
+            },
+            "critical_products": [
+                "Cloud Database Engine",
+                "Web Application Firewall"
+            ],
+            "business_services": {
+                "Cloud Database Engine": "product database",
+                "Web Application Firewall": "public web application edge"
+            }
+        },
+        {
+            "org_id": "ORG-003",
+            "name": "Municipal Utility Provider",
+            "sector": "Critical Infrastructure",
+            "risk_appetite": "Zero-Tolerance",
+            "exposure": "internal",
+            "service_importance": "Critical",
+            "weight_modifiers": {
+                "cvss_weight": 0.5,
+                "cisa_kev_weight": 0.4,
+                "first_epss_weight": 0.1
+            },
+            "critical_products": [
+                "Embedded IoT Gateway",
+                "Enterprise Router OS"
+            ],
+            "business_services": {
+                "Embedded IoT Gateway": "metering / SCADA gateways",
+                "Enterprise Router OS": "core network routing infrastructure"
+            }
+        }
+    ]
+}

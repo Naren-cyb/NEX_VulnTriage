@@ -1,0 +1,3919 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Nexora · Vulnerability Triage</title>
+
+  <style>/* =============================================================
+
+   NEX-CODE-SRIKERS · Personalised Vulnerability Triage
+
+   Dashboard styles — dark security theme
+
+   ============================================================= */
+
+
+
+:root {
+
+  --bg: #0f0518;
+
+  --bg-2: #160a26;
+
+  --panel: rgba(168, 85, 247, 0.06);
+
+  --panel-2: rgba(168, 85, 247, 0.10);
+
+  --border: rgba(168, 85, 247, 0.18);
+
+  --border-soft: rgba(255, 255, 255, 0.08);
+
+  --text: #ffffff;
+
+  --muted: #a5a0c4;
+
+  --accent: #a855f7;
+
+  --accent-2: #06b6d4;
+
+  --accent-pink: #ec4899;
+
+  --crit: #ef4444;
+
+  --high: #f97316;
+
+  --med: #eab308;
+
+  --low: #22c55e;
+
+  --glow: rgba(168, 85, 247, 0.45);
+
+  --glow-cyan: rgba(6, 182, 212, 0.35);
+
+  --shadow: 0 10px 36px rgba(124, 58, 237, 0.28);
+
+  --radius: 14px;
+
+  --mono: "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+
+}
+
+
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+
+html, body { height: 100%; }
+
+
+
+body {
+
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  background:
+
+    radial-gradient(900px 520px at 82% -12%, rgba(168, 85, 247, 0.22), transparent 60%),
+
+    radial-gradient(700px 420px at 0% 110%, rgba(6, 182, 212, 0.12), transparent 60%),
+
+    linear-gradient(180deg, #0f0518 0%, #0c0414 100%);
+
+  color: var(--text);
+
+  line-height: 1.5;
+
+  min-height: 100vh;
+
+  padding: 0 0 60px;
+
+}
+
+
+
+/* ---------- 3D HERO ---------- */
+
+.hero {
+
+  position: relative;
+
+  height: 360px;
+
+  border-radius: 0 0 var(--radius) var(--radius);
+
+  overflow: hidden;
+
+  margin-bottom: 28px;
+
+  border-bottom: 1px solid var(--border);
+
+  background:
+
+    radial-gradient(900px 480px at 78% 20%, rgba(168,85,247,.28), transparent 62%),
+
+    radial-gradient(640px 380px at 14% 90%, rgba(6,182,212,.16), transparent 60%),
+
+    linear-gradient(180deg, #160a26 0%, #0c0414 100%);
+
+}
+
+#hero3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.hero-grid {
+
+  position: absolute; inset: 0; pointer-events: none;
+
+  background-image:
+
+    linear-gradient(rgba(168,85,247,.10) 1px, transparent 1px),
+
+    linear-gradient(90deg, rgba(168,85,247,.10) 1px, transparent 1px);
+
+  background-size: 46px 46px;
+
+  mask-image: radial-gradient(circle at 70% 30%, #000 0%, transparent 78%);
+
+  -webkit-mask-image: radial-gradient(circle at 70% 30%, #000 0%, transparent 78%);
+
+  animation: gridShift 18s linear infinite;
+
+  opacity: .55;
+
+}
+
+@keyframes gridShift { from { background-position: 0 0; } to { background-position: 46px 46px; } }
+
+.hero-content {
+
+  position: absolute; inset: 0; z-index: 2;
+
+  display: flex; flex-direction: column; justify-content: center;
+
+  gap: 14px; max-width: 760px; padding: 0 48px;
+
+}
+
+.hero-badge {
+
+  align-self: flex-start;
+
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+
+  color: var(--accent-2);
+
+  padding: 6px 12px; border-radius: 999px;
+
+  background: rgba(6,182,212,.10); border: 1px solid rgba(6,182,212,.3);
+
+}
+
+.hero-title {
+
+  font-size: 40px; line-height: 1.1; font-weight: 800; letter-spacing: -0.5px;
+
+  text-shadow: 0 0 30px rgba(168,85,247,.45);
+
+}
+
+.hero-title span {
+
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+
+}
+
+.hero-sub { font-size: 15px; color: var(--muted); max-width: 540px; }
+
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+.hero-cta-item {
+
+  font-size: 12px; font-weight: 600; color: #e9d5ff;
+
+  padding: 6px 12px; border-radius: 8px;
+
+  background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.28);
+
+}
+
+@media (max-width: 720px) { .hero { height: 300px; } .hero-title { font-size: 28px; } .hero-content { padding: 0 22px; } }
+
+
+
+/* ---------- Layout shell ---------- */
+
+header.top {
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 30;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 14px 28px;
+
+  background: rgba(15, 5, 24, 0.82);
+
+  backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid var(--border);
+
+}
+
+
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.brand .logo {
+
+  width: 38px; height: 38px; border-radius: 10px;
+
+  display: grid; place-items: center;
+
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+
+  color: #06121f; font-weight: 800; font-size: 20px;
+
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.55);
+
+}
+
+.brand h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
+
+.brand h1 span { color: var(--accent-2); }
+
+.brand small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; }
+
+
+
+.status-pill {
+
+  display: flex; align-items: center; gap: 8px;
+
+  font-size: 12px; color: var(--muted);
+
+  padding: 6px 12px; border: 1px solid var(--border);
+
+  border-radius: 999px; background: var(--panel);
+
+}
+
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--low); box-shadow: 0 0 8px var(--low); animation: pulse 2s infinite; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+
+
+main { max-width: 1180px; margin: 0 auto; padding: 28px 24px; }
+
+
+
+/* ---------- Dashboard 2-column grid (results + side rail) ---------- */
+
+.dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+
+.view { animation: viewIn .3s ease both; }
+
+@keyframes viewIn { from{opacity:0} to{opacity:1} }
+
+.triage-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+
+.back-btn {
+
+  background: var(--panel); border: 1px solid var(--border); color: var(--muted);
+
+  padding: 8px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+
+  transition: all .15s; white-space: nowrap;
+
+}
+
+.back-btn:hover { color: var(--text); border-color: var(--accent); background: var(--panel-2); }
+
+.triage-title { font-size: 18px; font-weight: 700; }
+
+.triage-title::after { content: ""; display: block; height: 2px; margin-top: 6px;
+
+  background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 2px; width: 120px; }
+
+.side-rail { display: flex; flex-direction: column; gap: 16px; }
+
+.rail-card {
+
+  position: relative; overflow: hidden;
+
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+
+  padding: 16px; box-shadow: var(--shadow);
+
+  animation: railFade .5s ease both;
+
+}
+
+/* subtle moving sheen — alive but not floaty */
+
+.rail-card::after {
+
+  content: ""; position: absolute; top: 0; left: -60%; width: 55%; height: 100%;
+
+  background: linear-gradient(100deg, transparent, rgba(168,85,247,.10), transparent);
+
+  transform: skewX(-18deg); animation: railSweep 2.5s ease-in-out infinite;
+
+ pointer-events: none;
+
+ }
+
+ @keyframes railSweep { 0%{left:-60%} 55%,100%{left:130%} }
+
+ @keyframes railFade { from{opacity:0; transform: translateY(6px)} to{opacity:1; transform:none} }
+
+.rail-head { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+
+.rail-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--glow); animation: dotPulse 1.2s ease-in-out infinite; }
+
+.rail-dot.cyan { background: var(--accent-2); box-shadow: 0 0 10px var(--glow-cyan); }
+
+@keyframes dotPulse { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.5; transform:scale(.8)} }
+
+.threat-feed { display: flex; flex-direction: column; gap: 9px; max-height: 340px; overflow: auto; }
+
+.tf-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(255,255,255,.03); border: 1px solid var(--border-soft); font-size: 12.5px; }
+
+.tf-item .tf-cve { font-family: var(--mono); font-weight: 700; color: var(--text); }
+
+.tf-item .tf-prod { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tf-item .tf-tag { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px; }
+
+.tf-item { animation: tfIn .22s ease both; }
+
+@keyframes tfIn { from{opacity:0; transform: translateX(8px)} to{opacity:1; transform:none} }
+
+.tf-kev { background: rgba(239,68,68,.9); color: #fff; }
+
+.tf-epss { background: rgba(168,85,247,.22); color: #e9d5ff; border: 1px solid rgba(168,85,247,.4); }
+
+.src-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+.src-list li { display: flex; flex-direction: column; padding: 8px 10px; border-radius: 9px; background: rgba(255,255,255,.03); border: 1px solid var(--border-soft); }
+
+.src-list b { font-size: 13px; color: var(--text); }
+
+.src-list span { font-size: 11.5px; color: var(--muted); }
+
+.rail-cta { background: linear-gradient(135deg, rgba(168,85,247,.16), rgba(6,182,212,.10)); border-color: rgba(168,85,247,.35); }
+
+.rail-cta-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+
+.rail-cta p { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
+
+.rail-cta .btn-primary { width: 100%; text-align: center; }
+
+
+
+/* ---------- Section titles ---------- */
+
+h2.sec { font-size: 16px; font-weight: 700; margin: 30px 0 14px; color: var(--text); }
+
+h2.sec span { color: var(--accent-2); }
+
+
+
+/* ---------- Org selector cards ---------- */
+
+.orgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.org-card {
+
+  position: relative;
+
+  padding: 20px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  background: var(--panel);
+
+  cursor: pointer;
+
+  transition: transform 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+
+  overflow: hidden;
+
+}
+
+.org-card::before {
+
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+  opacity: 0;
+
+}
+
+.org-card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--panel-2); }
+
+.org-card.active { border-color: var(--accent); background: var(--panel-2); box-shadow: 0 0 0 1px rgba(168,85,247,.4), 0 12px 34px rgba(124,58,237,.30); }
+
+.org-card.active::before { opacity: 1; }
+
+
+
+.org-card .o-emoji { font-size: 30px; }
+
+.org-card h3 { font-size: 16px; font-weight: 700; margin-top: 10px; }
+
+.org-card .o-meta { margin-top: 6px; font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+
+.org-card .o-top { display: flex; align-items: flex-start; justify-content: space-between; }
+
+.org-card .o-dial { flex: 0 0 auto; filter: drop-shadow(0 0 8px rgba(168,85,247,.4)); }
+
+.org-card .o-sector { margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+
+.org-card .o-meters { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.o-meter { font-size: 11px; color: var(--muted); }
+
+.o-meter > span { display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; font-size: 10px; }
+
+.o-meter .m-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+
+.o-meter .m-bar i { display: block; height: 100%; border-radius: 999px; }
+
+.o-meter b { display: inline-block; margin-top: 4px; font-size: 11.5px; color: var(--text); font-weight: 600; }
+
+.org-card .o-chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+.o-chip { font-size: 10.5px; padding: 3px 8px; border-radius: 7px; background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.28); color: #e9d5ff; }
+
+.org-card .o-tag {
+
+  display: inline-block; margin-top: 14px;
+
+  padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+
+}
+
+.tag-risk-low { background: rgba(34,197,94,.15); color: var(--low); }
+
+.tag-risk-high { background: rgba(249,115,22,.15); color: var(--high); }
+
+.tag-risk-zero { background: rgba(239,68,68,.15); color: var(--crit); }
+
+
+
+/* ---------- KEV alert banner ---------- */
+
+.banner {
+
+  display: none; align-items: flex-start; gap: 12px;
+
+  margin-top: 22px; padding: 16px 18px;
+
+  border-radius: var(--radius);
+
+  border: 1px solid rgba(239, 68, 68, 0.35);
+
+  background: linear-gradient(90deg, rgba(239,68,68,.15), rgba(239,68,68,.04));
+
+}
+
+.banner.show { display: flex; }
+
+.banner .b-icon { font-size: 24px; line-height: 1; }
+
+.banner b { color: #fecaca; }
+
+.banner p { font-size: 13.5px; color: #fda4af; margin-top: 2px; }
+
+
+
+/* ---------- Stats row ---------- */
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+
+.stat {
+
+  padding: 16px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  background: var(--panel);
+
+}
+
+.stat .v { font-size: 30px; font-weight: 800; font-family: var(--mono); }
+
+.stat .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.stat .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+
+
+/* ---------- View toggle ---------- */
+
+.toggle-wrap { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+
+.toggle {
+
+  display: flex; align-items: center; gap: 10px;
+
+  padding: 8px 14px; border-radius: 999px;
+
+  border: 1px solid var(--border); background: var(--panel);
+
+  cursor: pointer; user-select: none;
+
+  transition: all 0.15s;
+
+}
+
+.toggle .t-dot {
+
+  width: 34px; height: 20px; border-radius: 999px;
+
+  background: rgba(255,255,255,.12); position: relative; transition: background .2s;
+
+}
+
+.toggle .t-dot::after {
+
+  content: ""; position: absolute; top: 2px; left: 2px;
+
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+
+  transition: transform .2s;
+
+}
+
+.toggle.on { border-color: var(--accent); background: var(--panel-2); }
+
+.toggle.on .t-dot { background: var(--accent); }
+
+.toggle.on .t-dot::after { transform: translateX(14px); }
+
+.toggle .t-lab { font-size: 13px; font-weight: 600; }
+
+.toggle .t-desc { font-size: 11px; color: var(--muted); }
+
+
+
+/* ---------- Vulnerabilities list ---------- */
+
+.vuln-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+
+.vuln-item {
+
+  display: flex; gap: 16px; align-items: flex-start;
+
+  padding: 18px 20px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  background: var(--panel);
+
+  animation: slideIn .35s ease both;
+
+  transition: border-color .15s;
+
+}
+
+.vuln-item:hover { border-color: rgba(168,85,247,.45); box-shadow: 0 8px 30px rgba(124,58,237,.18); }
+
+@keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+
+
+.rank-badge {
+
+  flex: 0 0 auto; width: 42px; height: 42px; border-radius: 12px;
+
+  display: grid; place-items: center;
+
+  font-family: var(--mono); font-weight: 800; font-size: 18px;
+
+}
+
+.rank-1 { background: linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; box-shadow:0 0 18px rgba(239,68,68,.5); }
+
+.rank-2 { background: linear-gradient(135deg,#f97316,#c2410c); color:#fff; }
+
+.rank-3 { background: linear-gradient(135deg,#eab308,#a16207); color:#1a1200; }
+
+.rank-4, .rank-5 { background: rgba(255,255,255,.08); color: var(--muted); }
+
+
+
+.vuln-main { flex: 1; min-width: 0; }
+
+.vuln-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.vuln-head .cve { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--text); }
+
+.vuln-head .prod { font-size: 14px; color: var(--muted); }
+
+.vuln-head .sev {
+
+  font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+
+}
+
+.sev-critical { background: rgba(239,68,68,.18); color:#fca5a5; }
+
+.sev-high { background: rgba(249,115,22,.18); color:#fdba74; }
+
+.sev-medium { background: rgba(234,179,8,.18); color:#fde68a; }
+
+.sev-low { background: rgba(34,197,94,.18); color:#86efac; }
+
+
+
+.badge-kev {
+
+  display: inline-flex; align-items: center; gap: 5px;
+
+  font-size: 11px; font-weight: 800; letter-spacing: .3px;
+
+  padding: 3px 9px; border-radius: 999px;
+
+  background: rgba(239,68,68,.95); color: #fff;
+
+  animation: blink 1.6s infinite;
+
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.55} }
+
+
+
+/* Priority badge (URGENT / High / Medium / Low) */
+
+.pri {
+
+  display: inline-flex; align-items: center;
+
+  font-size: 11px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase;
+
+  padding: 3px 9px; border-radius: 999px;
+
+}
+
+.pri-urgent { background: rgba(239,68,68,.95); color: #fff; }
+
+.pri-high { background: rgba(249,115,22,.2); color: #fdba74; border: 1px solid rgba(249,115,22,.4); }
+
+.pri-medium { background: rgba(234,179,8,.18); color: #fde68a; border: 1px solid rgba(234,179,8,.35); }
+
+.pri-low { background: rgba(34,197,94,.16); color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+
+
+
+/* NEEDS VERIFICATION badge (honest version handling) */
+
+.badge-verify {
+
+  display: inline-flex; align-items: center; gap: 4px;
+
+  font-size: 11px; font-weight: 700; letter-spacing: .3px;
+
+  padding: 3px 9px; border-radius: 999px;
+
+  background: rgba(168,85,247,.16); color: #d8b4fe; border: 1px solid rgba(168,85,247,.4);
+
+}
+
+
+
+/* Plain-language explanation rows */
+
+.vuln-desc {
+
+  margin-top: 10px; font-size: 13.5px; color: var(--text); font-weight: 500;
+
+}
+
+.vuln-desc .row-line {
+
+  display: flex; gap: 8px; margin: 6px 0; line-height: 1.45;
+
+}
+
+.vuln-desc .rl-label {
+
+  flex: 0 0 auto; min-width: 104px; font-weight: 700; color: var(--accent-2);
+
+  text-transform: uppercase; font-size: 10.5px; letter-spacing: .4px;
+
+  padding-top: 1px;
+
+}
+
+.vuln-desc .row-line > span:last-child { color: var(--text); }
+
+
+
+/* Visible contributing-factor chips + score bar */
+
+.factor-wrap { margin-top: 12px; }
+
+.factor-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.factor-chip {
+
+  display: inline-flex; align-items: center; gap: 5px;
+
+  font-size: 11px; font-weight: 600;
+
+  padding: 4px 9px; border-radius: 8px;
+
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+
+  color: var(--muted);
+
+}
+
+.factor-chip b { color: var(--text); font-family: var(--mono); }
+
+.factor-bar {
+
+  position: relative; margin-top: 10px; height: 20px; border-radius: 8px;
+
+  background: rgba(255,255,255,.07); overflow: hidden;
+
+}
+
+.factor-bar-fill { height: 100%; border-radius: 8px; transition: width .6s ease; opacity: .85; }
+
+.factor-bar-num {
+
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+
+  font-family: var(--mono); font-size: 11.5px; font-weight: 700; color: #fff;
+
+  text-shadow: 0 1px 3px rgba(0,0,0,.6);
+
+}
+
+
+
+/* Provenance / source line */
+
+.src-line { margin-top: 10px; font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+
+.src-name { color: var(--muted); }
+
+.src-date { color: var(--muted); opacity: .8; }
+
+.src-link { color: var(--accent); text-decoration: none; margin-left: 4px; }
+
+.src-link:hover { text-decoration: underline; }
+
+
+
+.owner-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+
+.breakdown .fac-val { text-align: right; color: var(--accent-2); font-weight: 700; }
+
+.breakdown .fac-total td { border-top: 1px solid var(--border); border-bottom: none; font-weight: 700; color: var(--text); }
+
+
+
+/* ---- OWNER VIEW: plain-language card ---- */
+
+.owner-plain { margin-top: 12px; font-size: 14px; line-height: 1.55; }
+
+.owner-consequence { font-size: 15px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+
+.owner-why { color: var(--text); margin: 0 0 8px; }
+
+.owner-impact { color: var(--muted); margin: 0; }
+
+.owner-urgency {
+
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+
+  background: rgba(34,197,94,.14); color: #86efac; border: 1px solid rgba(34,197,94,.3);
+
+}
+
+.owner-confidence { font-size: 12px; color: var(--muted); }
+
+.owner-next {
+
+  margin-top: 12px; padding: 10px 12px; border-radius: 10px;
+
+  background: rgba(168,85,247,.10); border: 1px solid rgba(168,85,247,.25);
+
+  font-size: 13.5px; color: var(--text); display: flex; gap: 8px; flex-wrap: wrap;
+
+}
+
+.owner-next .rl-label { font-weight: 700; color: var(--accent-2); text-transform: uppercase; font-size: 10.5px; letter-spacing: .4px; padding-top: 1px; }
+
+
+
+/* ---- IT WORKER VIEW: technical card ---- */
+
+.it-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+
+.it-metric {
+
+  background: rgba(0,0,0,.22); border: 1px solid var(--border);
+
+  border-radius: 10px; padding: 8px 10px; text-align: center;
+
+}
+
+.it-metric .im-l { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+
+.it-metric .im-v { display: block; font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 2px; }
+
+.it-next { margin-top: 12px; font-size: 13px; color: var(--text); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.it-confidence { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.vuln-tech {
+
+  display: none; margin-top: 12px; padding-top: 12px;
+
+  border-top: 1px dashed var(--border);
+
+}
+
+.vuln-tech.show { display: block; }
+
+
+
+.score-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+
+.score-cell {
+
+  background: rgba(0,0,0,.22); border: 1px solid var(--border);
+
+  border-radius: 10px; padding: 10px 12px;
+
+}
+
+.score-cell .sc-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+
+.score-cell .sc-v { font-family: var(--mono); font-size: 17px; font-weight: 700; margin-top: 2px; }
+
+
+
+.wbar { height: 7px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 14px; }
+
+.wbar-fill { height: 100%; border-radius: 6px; transition: width .6s ease; }
+
+
+
+.effort-badge {
+
+  margin-top: 12px; display: inline-block;
+
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
+
+}
+
+.effort-high { background: rgba(239,68,68,.16); color:#fda4af; border:1px solid rgba(239,68,68,.35); }
+
+.effort-std { background: rgba(249,115,22,.16); color:#fdba74; border:1px solid rgba(249,115,22,.35); }
+
+.effort-quick { background: rgba(34,197,94,.14); color:#86efac; border:1px solid rgba(34,197,94,.3); }
+
+
+
+/* Score breakdown table (IT view) */
+
+.breakdown { margin-top: 14px; width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+.breakdown th {
+
+  text-align: left; color: var(--muted); font-weight: 600; text-transform: uppercase;
+
+  letter-spacing: .4px; font-size: 11px; padding: 6px 8px; border-bottom: 1px solid var(--border);
+
+}
+
+.breakdown td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,.04); font-family: var(--mono); }
+
+.breakdown .match-y { color: var(--low); font-weight: 700; }
+
+.breakdown .match-n { color: var(--crit); font-weight: 700; }
+
+
+
+/* ---------- Negative test panel ---------- */
+
+.negbox { margin-top: 26px; }
+
+.negbox summary {
+
+  cursor: pointer; font-size: 13px; color: var(--muted);
+
+  padding: 10px 0; list-style: none;
+
+}
+
+.negbox summary:hover { color: var(--text); }
+
+.neg-list { max-height: 220px; overflow: auto; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 12.5px; font-family: var(--mono); }
+
+.neg-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,.05); }
+
+.neg-row .neg-prod { color: var(--muted); }
+
+.neg-row .neg-cvss { color: var(--high); font-weight: 700; }
+
+
+
+/* ---------- Loading / empty ---------- */
+
+.loading, .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+
+.spinner {
+
+  width: 26px; height: 26px; margin: 0 auto 14px;
+
+  border: 3px solid rgba(255,255,255,.12); border-top-color: var(--accent);
+
+  border-radius: 50%; animation: spin .8s linear infinite;
+
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+
+/* ---------- Footer ---------- */
+
+footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 50px; padding: 0 20px; }
+
+
+
+/* ---------- Notification toast ---------- */
+
+.toast {
+
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+
+  background: rgba(15,24,48,.95); border: 1px solid var(--accent); color: var(--text);
+
+  padding: 12px 20px; border-radius: 10px; font-size: 13px;
+
+  box-shadow: var(--shadow); opacity: 0; pointer-events: none;
+
+  transition: opacity .25s, transform .25s; z-index: 99;
+
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+
+/* ---------- Priority Matrix (3×3) ---------- */
+
+.matrix-wrap { margin-top: 22px; }
+
+.matrix-wrap h2.sec { margin-bottom: 10px; }
+
+.matrix-grid {
+
+  display: grid;
+
+  grid-template-columns: auto repeat(3, 1fr);
+
+  grid-template-rows: auto repeat(4, 72px);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  overflow: hidden;
+
+  background: var(--panel);
+
+}
+
+.matrix-corner {
+
+  background: var(--panel);
+
+  border-right: 1px solid var(--border);
+
+  border-bottom: 1px solid var(--border);
+
+  display: flex; align-items: flex-end; justify-content: flex-start;
+
+  padding: 8px 10px;
+
+}
+
+.matrix-col-hdr {
+
+  background: var(--panel-2);
+
+  border-bottom: 1px solid var(--border);
+
+  display: flex; align-items: center; justify-content: center;
+
+  padding: 8px 4px; text-align: center;
+
+}
+
+.matrix-col-hdr span { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+
+.matrix-row-hdr {
+
+  background: var(--panel-2);
+
+  border-right: 1px solid var(--border);
+
+  display: flex; align-items: center; justify-content: center;
+
+  padding: 4px 8px; text-align: center;
+
+}
+
+.matrix-row-hdr span { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); writing-mode: horizontal-tb; }
+
+.matrix-cell {
+
+  border-right: 1px solid var(--border);
+
+  border-bottom: 1px solid var(--border);
+
+  padding: 4px; display: flex; flex-direction: column; gap: 3px;
+
+  position: relative;
+
+}
+
+.matrix-cell:last-child { border-right: none; }
+
+.matrix-cell .mex { font-size: 10px; color: var(--muted); text-align: center; margin-bottom: 2px; }
+
+.matrix-dot {
+
+  display: inline-flex; align-items: center; gap: 3px;
+
+  padding: 2px 5px; border-radius: 4px; font-size: 10px; font-family: var(--mono);
+
+  white-space: nowrap; overflow: hidden; max-width: 100%;
+
+  cursor: default;
+
+}
+
+.matrix-dot:hover { opacity: .8; }
+
+.matrix-legend {
+
+  display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
+
+  font-size: 11.5px; color: var(--muted);
+
+}
+
+.matrix-legend span { display: flex; align-items: center; gap: 5px; }
+
+.matrix-dot-inner { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+
+
+
+/* ---------- Header nav ---------- */
+
+.nav { display: flex; align-items: center; gap: 6px; margin-left: 8px; }
+
+.nav-link {
+
+  color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600;
+
+  padding: 7px 12px; border-radius: 999px; border: 1px solid transparent;
+
+  transition: all .15s; cursor: pointer;
+
+}
+
+.nav-link:hover { color: var(--text); border-color: var(--border); background: var(--panel); }
+
+.nav-link.active { color: #fff; background: var(--accent); border-color: var(--accent); box-shadow: 0 0 14px var(--glow); }
+
+
+
+.custom-summary { margin-bottom: 6px; }
+
+
+
+/* ---------- Header upload button ---------- */
+
+.header-upload-btn {
+
+  padding: 8px 16px;
+
+  background: var(--accent);
+
+  color: #fff;
+
+  border: none;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background .15s, transform .1s;
+
+  white-space: nowrap;
+
+}
+
+.header-upload-btn:hover { background: #9333ea; box-shadow: 0 0 18px var(--glow); transform: translateY(-1px); }
+
+.header-upload-btn:active { transform: translateY(0); }
+
+
+
+/* ---------- Upload modal ---------- */
+
+.modal-overlay {
+
+  position: fixed; inset: 0; z-index: 50;
+
+  background: rgba(0,0,0,.65);
+
+  backdrop-filter: blur(4px);
+
+  display: flex; align-items: center; justify-content: center;
+
+  padding: 20px;
+
+}
+
+.modal {
+
+  background: var(--bg-2);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  width: 100%; max-width: 580px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  box-shadow: var(--shadow);
+
+  animation: slideIn .2s ease;
+
+}
+
+.modal-head {
+
+  display: flex; align-items: center; justify-content: space-between;
+
+  margin-bottom: 10px;
+
+}
+
+.modal-head h2 { font-size: 18px; font-weight: 700; }
+
+.modal-close {
+
+  background: none; border: none; color: var(--muted);
+
+  font-size: 24px; cursor: pointer; line-height: 1; padding: 2px 6px;
+
+  border-radius: 6px; transition: color .15s, background .15s;
+
+}
+
+.modal-close:hover { color: var(--text); background: var(--panel-2); }
+
+.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+
+
+/* Drop zone */
+
+.drop-zone {
+
+  border: 2px dashed var(--border);
+
+  border-radius: var(--radius);
+
+  padding: 28px 20px;
+
+  text-align: center;
+
+  transition: border-color .15s, background .15s;
+
+  cursor: default;
+
+}
+
+.drop-zone.drag-over { border-color: var(--accent); background: rgba(168,85,247,.08); }
+
+.dz-icon { font-size: 36px; margin-bottom: 8px; }
+
+.dz-text { font-size: 14px; color: var(--text); margin-bottom: 6px; }
+
+.dz-or { font-size: 11px; color: var(--muted); margin: 8px 0; }
+
+.dz-btn {
+
+  display: inline-block;
+
+  padding: 7px 18px;
+
+  background: var(--accent);
+
+  color: #fff;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background .15s;
+
+}
+
+.dz-btn:hover { background: #9333ea; box-shadow: 0 0 16px var(--glow); }
+
+.dz-hint { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+
+
+/* Separator */
+
+.modal-sep {
+
+  display: flex; align-items: center; gap: 12px;
+
+  margin: 18px 0 14px;
+
+  color: var(--muted); font-size: 12px;
+
+}
+
+.modal-sep::before, .modal-sep::after {
+
+  content: ""; flex: 1; height: 1px; background: var(--border);
+
+}
+
+
+
+/* JSON textarea */
+
+.json-textarea {
+
+  width: 100%; min-height: 180px;
+
+  background: rgba(0,0,0,.25);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  color: var(--text);
+
+  font-family: var(--mono);
+
+  font-size: 12px;
+
+  padding: 12px 14px;
+
+  resize: vertical;
+
+  outline: none;
+
+  transition: border-color .15s;
+
+  line-height: 1.5;
+
+}
+
+.json-textarea:focus { border-color: var(--accent); }
+
+.json-textarea::placeholder { color: rgba(138,151,173,.5); }
+
+
+
+/* Error */
+
+.upload-error {
+
+  margin-top: 10px; padding: 10px 14px;
+
+  background: rgba(239,68,68,.12);
+
+  border: 1px solid rgba(239,68,68,.35);
+
+  border-radius: 8px;
+
+  font-size: 12.5px; color: #fca5a5;
+
+}
+
+
+
+/* Modal actions */
+
+.modal-actions {
+
+  display: flex; gap: 10px; justify-content: flex-end;
+
+  margin-top: 18px;
+
+}
+
+.btn-primary {
+
+  padding: 9px 22px;
+
+  background: var(--accent);
+
+  color: #fff;
+
+  border: none;
+
+  border-radius: 9px;
+
+  font-size: 14px; font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background .15s;
+
+}
+
+.btn-primary:hover { background: #9333ea; box-shadow: 0 0 18px var(--glow); }
+
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-secondary {
+
+  padding: 9px 22px;
+
+  background: var(--panel-2);
+
+  color: var(--muted);
+
+  border: 1px solid var(--border);
+
+  border-radius: 9px;
+
+  font-size: 14px; font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background .15s, color .15s;
+
+}
+
+.btn-secondary:hover { background: var(--panel); color: var(--text); }
+
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 980px) {
+
+  .dash-grid { grid-template-columns: 1fr; }
+
+  .side-rail { position: static; flex-direction: row; flex-wrap: wrap; }
+
+  .side-rail .rail-card { flex: 1 1 240px; }
+
+}
+
+@media (max-width: 820px) {
+
+  .orgs { grid-template-columns: 1fr; }
+
+  .stats { grid-template-columns: repeat(2, 1fr); }
+
+  .score-row { grid-template-columns: 1fr 1fr; }
+
+  header.top { flex-wrap: wrap; }
+
+  .matrix-grid { font-size: 10px; }
+
+}
+
+@media (max-width: 480px) {
+
+  .score-row { grid-template-columns: 1fr; }
+
+  .brand small { display: none; }
+
+}</style>
+
+</head>
+
+<body>
+
+
+
+  <!-- ====== HEADER ====== -->
+
+  <header class="top">
+
+    <div class="brand">
+
+      <div class="logo">NX</div>
+
+      <h1>Nexora <span>VulnTriage</span></h1>
+
+      <small>Personalised Vulnerability Prioritisation · 24-hr Challenge</small>
+
+    </div>
+
+    <nav class="nav">
+
+      <a href="#" class="nav-link" data-view="home">Home</a>
+
+      <a href="#" class="nav-link" data-view="home">Organisations</a>
+
+      <a href="#" class="nav-link" id="navUpload">Upload Profile</a>
+
+    </nav>
+
+    <div class="status-pill">
+
+      <div class="status-dot"></div>
+
+      <span id="statusText">Loading…</span>
+
+    </div>
+
+    <button id="uploadBtn" class="header-upload-btn">+ Upload Profile</button>
+
+  </header>
+
+
+
+  <main>
+
+
+
+    <!-- ====== HOME VIEW ====== -->
+
+    <section id="view-home" class="view">
+
+
+
+    <!-- ====== 3D HERO ====== -->
+
+    <section class="hero">
+
+      <canvas id="hero3d"></canvas>
+
+      <div class="hero-grid"></div>
+
+      <div class="hero-content">
+
+        <div class="hero-badge">◆ CYBERSECURITY · VULNERABILITY TRIAGE</div>
+
+        <h1 class="hero-title">Threat-aware prioritisation for <span>every organisation</span></h1>
+
+        <p class="hero-sub">A rotating 3D threat map of your exposure — personalised, explainable, and grounded in public intelligence.</p>
+
+        <div class="hero-cta">
+
+          <span class="hero-cta-item">◈ CISA KEV</span>
+
+          <span class="hero-cta-item">◈ NVD CVSS</span>
+
+          <span class="hero-cta-item">◈ FIRST EPSS</span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ====== ORG SELECTOR ====== -->
+
+    <h2 class="sec">Select <span>Organisation</span></h2>
+
+    <div id="orgContainer" class="orgs">
+
+      <!-- Rendered by JS -->
+
+    </div>
+
+
+
+    </section><!-- /#view-home -->
+
+
+
+    <!-- ====== TRIAGE VIEW ====== -->
+
+    <section id="view-triage" class="view" style="display:none">
+
+      <div class="triage-bar">
+
+        <button class="back-btn" id="backBtn">← Back to organisations</button>
+
+        <h2 id="triageTitle" class="triage-title"></h2>
+
+      </div>
+
+
+
+      <div id="customSummary" class="custom-summary" style="display:none"></div>
+
+
+
+    <!-- ====== DASHBOARD GRID (results + side rail) ====== -->
+
+    <div class="dash-grid">
+
+     <div class="dash-main">
+
+
+
+    <!-- ====== KEV BANNER ====== -->
+
+    <div id="kevBanner" class="banner">
+
+      <div class="b-icon">&#9888;&#65039;</div>
+
+      <div>
+
+        <b id="kevBannerTitle"></b>
+
+        <p id="kevBannerText"></p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====== STATS ====== -->
+
+    <div id="statsRow" class="stats" style="display:none">
+
+      <div class="stat">
+
+        <div class="v" id="stMatched">—</div>
+
+        <div class="l">Matched</div>
+
+        <div class="sub">from your stack</div>
+
+      </div>
+
+      <div class="stat">
+
+        <div class="v" id="stExcluded">—</div>
+
+        <div class="l">Excluded</div>
+
+        <div class="sub">not in your stack</div>
+
+      </div>
+
+      <div class="stat">
+
+        <div class="v" id="stSevere">—</div>
+
+        <div class="l">High / Critical</div>
+
+        <div class="sub">in Top 5</div>
+
+      </div>
+
+      <div class="stat">
+
+        <div class="v" id="stKev">—</div>
+
+        <div class="l">Actively Exploited</div>
+
+        <div class="sub">on CISA KEV list</div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====== VIEW TOGGLE ====== -->
+
+    <div id="toggleRow" class="toggle-wrap" style="display:none">
+
+      <div id="toggleBtn" class="toggle on">
+
+        <div class="t-dot"></div>
+
+        <div>
+
+          <div class="t-lab" id="toggleLab">Owner View</div>
+
+          <div class="t-desc" id="toggleDesc">Plain language, for decision-makers</div>
+
+        </div>
+
+      </div>
+
+      <span style="font-size:12px;color:var(--muted)">Click to switch</span>
+
+    </div>
+
+
+
+    <!-- ====== PRIORITY MATRIX ====== -->
+
+    <div id="priorityMatrix" class="matrix-wrap">
+
+      <h2 class="sec">Priority <span>Matrix</span> — CVSS Severity vs Exploitation Likelihood</h2>
+
+      <!-- Rendered by JS -->
+
+    </div>
+
+
+
+    <!-- ====== TOP 5 VULNERABILITIES ====== -->
+
+    <h2 class="sec" style="margin-top:24px">Top 5 <span>Prioritised Actions</span></h2>
+
+    <div id="vulnLoading" class="loading">Select an organisation to begin triage…</div>
+
+    <div id="vulnList" class="vuln-list"></div>
+
+
+
+    <!-- ====== NEGATIVE TEST ====== -->
+
+    <div id="negBox" class="negbox">
+
+      <details open>
+
+        <summary id="negSummary"></summary>
+
+        <div id="negList" class="neg-list"></div>
+
+      </details>
+
+    </div>
+
+
+
+    <!-- ====== VALIDATION ====== -->
+
+    <div id="validationArea"></div>
+
+     </div><!-- /.dash-main -->
+
+
+
+      <!-- ====== SIDE RAIL ====== -->
+
+      <aside class="side-rail">
+
+        <div class="rail-card">
+          <div class="rail-head"><span class="rail-dot"></span> Live Threat Feed</div>
+          <p style="font-size:12px;color:var(--muted)">Tap the 📊 button (bottom-right) to open the live threat feed &amp; intelligence panel.</p>
+        </div>
+
+        <div class="rail-card">
+
+          <div class="rail-head"><span class="rail-dot cyan"></span> Intelligence Sources</div>
+
+          <ul class="src-list">
+
+            <li><b>NIST NVD</b><span>CVSS severity scores</span></li>
+
+            <li><b>CISA KEV</b><span>Confirmed-exploited CVEs</span></li>
+
+            <li><b>FIRST EPSS</b><span>Exploit-probability model</span></li>
+
+          </ul>
+
+        </div>
+
+        <div class="rail-card rail-cta">
+
+          <div class="rail-cta-title">Run your own organisation</div>
+
+          <p>Upload a JSON profile and get a personalised Top-5 — no code, no auth.</p>
+
+          <button class="btn-primary" onclick="document.getElementById('uploadBtn').click()">+ Upload Profile</button>
+
+        </div>
+
+      </aside>
+
+
+
+    </div><!-- /.dash-grid -->
+
+
+
+    </section><!-- /#view-triage -->
+
+
+
+  </main>
+
+
+
+  <!-- ====== UPLOAD PROFILE MODAL ====== -->
+
+  <div id="uploadModal" class="modal-overlay" style="display:none">
+
+    <div class="modal">
+
+      <div class="modal-head">
+
+        <h2>Upload Company Profile</h2>
+
+        <button class="modal-close" id="modalClose">&times;</button>
+
+      </div>
+
+      <p class="modal-sub">Upload a JSON profile or paste one below to run triage for any organisation.</p>
+
+
+
+      <!-- File drop zone -->
+
+      <div id="dropZone" class="drop-zone">
+
+        <div class="dz-icon">&#128193;</div>
+
+        <div class="dz-text">Drop your <strong>.json</strong> file here</div>
+
+        <div class="dz-or">or</div>
+
+        <label class="dz-btn" for="fileInput">Browse Files</label>
+
+        <input type="file" id="fileInput" accept=".json,.csv,application/json,text/csv" style="display:none" />
+
+        <div class="dz-hint">Accepted: .json, .csv files</div>
+
+      </div>
+
+
+
+      <!-- Separator -->
+
+      <div class="modal-sep"><span>or paste JSON directly</span></div>
+
+
+
+      <!-- JSON textarea -->
+
+      <textarea id="profileJson" class="json-textarea" placeholder='{
+
+  "name": "My Company",
+
+  "sector": "Healthcare",
+
+  "risk_appetite": "Low",
+
+  "exposure": "internet-facing",
+
+  "service_importance": "Critical",
+
+  "weight_modifiers": {
+
+    "cvss_weight": 0.3,
+
+    "cisa_kev_weight": 0.45,
+
+    "first_epss_weight": 0.25
+
+  },
+
+  "critical_products": [
+
+    "Core Banking Framework",
+
+    "Cloud Database Engine"
+
+  ]
+
+}'></textarea>
+
+
+
+      <!-- Error display -->
+
+      <div id="uploadError" class="upload-error" style="display:none"></div>
+
+
+
+      <!-- Actions -->
+
+      <div class="modal-actions">
+
+        <button class="btn-secondary" id="modalCancel">Cancel</button>
+
+        <button class="btn-primary" id="runTriage">&#9654; Run Triage</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <footer>
+
+    Nexora VulnTriage · Personalised Vulnerability Triage System &nbsp;|&nbsp;
+
+    Data: NIST NVD · CISA KEV · FIRST EPSS (public snapshots) &nbsp;|&nbsp;
+
+    No paid feeds · No live APIs &nbsp;|&nbsp; Built in 24 hours
+
+  </footer>
+
+
+
+  <!-- ====== TOAST ====== -->
+  <div id="toast"></div>
+
+  <!-- ====== GLOBAL INTEL DRAWER (all pages) ====== -->
+  <button id="drawerBtn" class="drawer-btn" title="Open intelligence panel">📊</button>
+  <div id="drawerOverlay" class="drawer-overlay"></div>
+  <aside id="intelDrawer" class="intel-drawer">
+    <div class="drawer-head">
+      <span>Intelligence Panel</span>
+      <button id="drawerClose" class="drawer-close">×</button>
+    </div>
+    <div class="rail-card">
+      <div class="rail-head"><span class="rail-dot"></span> Live Threat Feed</div>
+      <div id="threatFeed" class="threat-feed"></div>
+    </div>
+    <div class="rail-card">
+      <div class="rail-head"><span class="rail-dot cyan"></span> Intelligence Sources</div>
+      <ul class="src-list">
+        <li><b>NIST NVD</b><span>CVSS severity scores</span></li>
+        <li><b>CISA KEV</b><span>Confirmed-exploited CVEs</span></li>
+        <li><b>FIRST EPSS</b><span>Exploit-probability model</span></li>
+      </ul>
+    </div>
+    <div class="rail-card rail-cta">
+      <div class="rail-cta-title">Run your own organisation</div>
+      <p>Upload a JSON profile and get a personalised Top-5 — no code, no auth.</p>
+      <button class="btn-primary" onclick="document.getElementById('uploadBtn').click()">+ Upload Profile</button>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       INLINED DATA (from data.js — generated by tools/gen_data.py)
+
+       ============================================================ -->
+
+  <script>/* Auto-generated by tools/gen_data.py — DO NOT EDIT BY HAND.
+
+   Regenerate with: python tools/gen_data.py
+
+   Source: data/vulnerabilities.csv, data/profiles.json, data/gold_set.csv */
+
+
+
+// Vulnerability records (offline fallback). Snapshot 2025-11-01
+
+window.VULNERABILITIES = [{"cve_id": "CVE-2025-5380", "product": "Core Banking Framework", "cvss": 9.8, "kev": false, "epss": 0.02704}, {"cve_id": "CVE-2025-7833", "product": "Core Banking Framework", "cvss": 8.1, "kev": false, "epss": 0.04122}, {"cve_id": "CVE-2025-2291", "product": "Identity Provider SaaS", "cvss": 8.4, "kev": false, "epss": 0.04667}, {"cve_id": "CVE-2026-1698", "product": "Identity Provider SaaS", "cvss": 4.3, "kev": true, "epss": 0.556}, {"cve_id": "CVE-2026-2678", "product": "Cloud Database Engine", "cvss": 9.9, "kev": false, "epss": 0.01935}, {"cve_id": "CVE-2026-1133", "product": "Enterprise Router OS", "cvss": 9.0, "kev": false, "epss": 0.01403}, {"cve_id": "CVE-2026-9322", "product": "Embedded IoT Gateway", "cvss": 8.9, "kev": false, "epss": 0.02799}, {"cve_id": "CVE-2026-3731", "product": "Core Banking Framework", "cvss": 8.5, "kev": false, "epss": 0.01065}, {"cve_id": "CVE-2025-1860", "product": "Identity Provider SaaS", "cvss": 5.6, "kev": false, "epss": 0.03797}, {"cve_id": "CVE-2023-1995", "product": "Embedded IoT Gateway", "cvss": 5.6, "kev": true, "epss": 0.63875}, {"cve_id": "CVE-2022-8400", "product": "Identity Provider SaaS", "cvss": 7.1, "kev": false, "epss": 0.02827}, {"cve_id": "CVE-2023-9945", "product": "Identity Provider SaaS", "cvss": 6.4, "kev": false, "epss": 0.81349}, {"cve_id": "CVE-2024-5636", "product": "Identity Provider SaaS", "cvss": 5.3, "kev": false, "epss": 0.5384}, {"cve_id": "CVE-2024-7287", "product": "Cloud Database Engine", "cvss": 6.4, "kev": false, "epss": 0.01774}, {"cve_id": "CVE-2025-6625", "product": "Enterprise Router OS", "cvss": 8.7, "kev": false, "epss": 0.04319}, {"cve_id": "CVE-2024-5496", "product": "Core Banking Framework", "cvss": 4.9, "kev": false, "epss": 0.01328}, {"cve_id": "CVE-2025-3693", "product": "Cloud Database Engine", "cvss": 7.7, "kev": false, "epss": 0.02919}, {"cve_id": "CVE-2023-1262", "product": "Enterprise Router OS", "cvss": 6.8, "kev": false, "epss": 0.03503}, {"cve_id": "CVE-2025-2693", "product": "Enterprise Router OS", "cvss": 9.4, "kev": false, "epss": 0.00903}, {"cve_id": "CVE-2025-5199", "product": "Identity Provider SaaS", "cvss": 4.2, "kev": false, "epss": 0.00926}, {"cve_id": "CVE-2025-1860", "product": "Core Banking Framework", "cvss": 6.8, "kev": false, "epss": 0.02542}, {"cve_id": "CVE-2022-2306", "product": "Cloud Database Engine", "cvss": 8.8, "kev": false, "epss": 0.89403}, {"cve_id": "CVE-2022-1391", "product": "Core Banking Framework", "cvss": 4.0, "kev": false, "epss": 0.70615}, {"cve_id": "CVE-2026-8027", "product": "Web Application Firewall", "cvss": 5.4, "kev": false, "epss": 0.03617}, {"cve_id": "CVE-2023-2816", "product": "Web Application Firewall", "cvss": 4.9, "kev": false, "epss": 0.0423}, {"cve_id": "CVE-2022-6917", "product": "Embedded IoT Gateway", "cvss": 4.6, "kev": false, "epss": 0.0125}, {"cve_id": "CVE-2024-3255", "product": "Core Banking Framework", "cvss": 5.1, "kev": false, "epss": 0.00492}, {"cve_id": "CVE-2022-3961", "product": "Embedded IoT Gateway", "cvss": 5.4, "kev": false, "epss": 0.01808}, {"cve_id": "CVE-2022-3967", "product": "Core Banking Framework", "cvss": 6.9, "kev": false, "epss": 0.02811}, {"cve_id": "CVE-2022-3143", "product": "Identity Provider SaaS", "cvss": 6.3, "kev": false, "epss": 0.03057}, {"cve_id": "CVE-2025-1728", "product": "Enterprise Router OS", "cvss": 5.4, "kev": false, "epss": 0.01267}, {"cve_id": "CVE-2023-1466", "product": "Web Application Firewall", "cvss": 5.1, "kev": false, "epss": 0.04489}, {"cve_id": "CVE-2025-1717", "product": "Identity Provider SaaS", "cvss": 7.1, "kev": false, "epss": 0.00605}, {"cve_id": "CVE-2025-5380", "product": "Identity Provider SaaS", "cvss": 9.2, "kev": false, "epss": 0.00896}, {"cve_id": "CVE-2022-9755", "product": "Enterprise Router OS", "cvss": 8.3, "kev": false, "epss": 0.04201}, {"cve_id": "CVE-2024-5496", "product": "Web Application Firewall", "cvss": 9.8, "kev": false, "epss": 0.03694}, {"cve_id": "CVE-2022-8996", "product": "Enterprise Router OS", "cvss": 7.7, "kev": false, "epss": 0.00814}, {"cve_id": "CVE-2024-7801", "product": "Enterprise Router OS", "cvss": 6.2, "kev": false, "epss": 0.02767}, {"cve_id": "CVE-2025-9666", "product": "Cloud Database Engine", "cvss": 4.5, "kev": false, "epss": 0.37935}, {"cve_id": "CVE-2026-5887", "product": "Identity Provider SaaS", "cvss": 6.1, "kev": false, "epss": 0.04827}, {"cve_id": "CVE-2024-1225", "product": "Cloud Database Engine", "cvss": 5.1, "kev": true, "epss": 0.80396}, {"cve_id": "CVE-2025-2484", "product": "Core Banking Framework", "cvss": 4.8, "kev": false, "epss": 0.0086}, {"cve_id": "CVE-2024-3427", "product": "Core Banking Framework", "cvss": 8.9, "kev": false, "epss": 0.01826}, {"cve_id": "CVE-2026-4440", "product": "Cloud Database Engine", "cvss": 6.4, "kev": false, "epss": 0.01916}, {"cve_id": "CVE-2025-5869", "product": "Core Banking Framework", "cvss": 5.8, "kev": false, "epss": 0.01199}, {"cve_id": "CVE-2024-9808", "product": "Cloud Database Engine", "cvss": 7.3, "kev": false, "epss": 0.00629}, {"cve_id": "CVE-2022-5555", "product": "Identity Provider SaaS", "cvss": 7.8, "kev": false, "epss": 0.83994}, {"cve_id": "CVE-2023-8455", "product": "Enterprise Router OS", "cvss": 7.2, "kev": false, "epss": 0.00801}, {"cve_id": "CVE-2023-1197", "product": "Core Banking Framework", "cvss": 5.5, "kev": false, "epss": 0.68752}, {"cve_id": "CVE-2025-7420", "product": "Core Banking Framework", "cvss": 9.3, "kev": false, "epss": 0.00598}, {"cve_id": "CVE-2026-1412", "product": "Core Banking Framework", "cvss": 4.8, "kev": false, "epss": 0.00792}, {"cve_id": "CVE-2024-6618", "product": "Embedded IoT Gateway", "cvss": 8.3, "kev": false, "epss": 0.03485}, {"cve_id": "CVE-2024-3703", "product": "Cloud Database Engine", "cvss": 5.5, "kev": false, "epss": 0.04547}, {"cve_id": "CVE-2026-5887", "product": "Web Application Firewall", "cvss": 6.4, "kev": false, "epss": 0.00809}, {"cve_id": "CVE-2024-8683", "product": "Web Application Firewall", "cvss": 4.6, "kev": false, "epss": 0.02985}, {"cve_id": "CVE-2025-7278", "product": "Core Banking Framework", "cvss": 4.6, "kev": false, "epss": 0.00658}, {"cve_id": "CVE-2025-8098", "product": "Core Banking Framework", "cvss": 5.0, "kev": false, "epss": 0.01694}, {"cve_id": "CVE-2024-9110", "product": "Identity Provider SaaS", "cvss": 7.5, "kev": false, "epss": 0.52793}, {"cve_id": "CVE-2026-8158", "product": "Cloud Database Engine", "cvss": 6.0, "kev": false, "epss": 0.04603}, {"cve_id": "CVE-2023-7303", "product": "Identity Provider SaaS", "cvss": 8.4, "kev": false, "epss": 0.0229}, {"cve_id": "CVE-2025-5869", "product": "Web Application Firewall", "cvss": 5.1, "kev": false, "epss": 0.04578}, {"cve_id": "CVE-2025-4051", "product": "Core Banking Framework", "cvss": 7.5, "kev": false, "epss": 0.75121}, {"cve_id": "CVE-2022-2636", "product": "Enterprise Router OS", "cvss": 4.9, "kev": false, "epss": 0.97787}, {"cve_id": "CVE-2024-6892", "product": "Enterprise Router OS", "cvss": 5.9, "kev": false, "epss": 0.04009}, {"cve_id": "CVE-2026-7873", "product": "Web Application Firewall", "cvss": 5.1, "kev": true, "epss": 0.62101}, {"cve_id": "CVE-2024-4556", "product": "Cloud Database Engine", "cvss": 5.8, "kev": false, "epss": 0.02696}, {"cve_id": "CVE-2023-9815", "product": "Cloud Database Engine", "cvss": 7.0, "kev": false, "epss": 0.52737}, {"cve_id": "CVE-2025-1854", "product": "Embedded IoT Gateway", "cvss": 9.0, "kev": false, "epss": 0.02781}, {"cve_id": "CVE-2026-8860", "product": "Core Banking Framework", "cvss": 7.6, "kev": false, "epss": 0.04443}, {"cve_id": "CVE-2023-6791", "product": "Cloud Database Engine", "cvss": 8.8, "kev": false, "epss": 0.04044}, {"cve_id": "CVE-2023-9716", "product": "Web Application Firewall", "cvss": 5.2, "kev": false, "epss": 0.00114}, {"cve_id": "CVE-2026-2191", "product": "Enterprise Router OS", "cvss": 5.2, "kev": true, "epss": 0.42338}, {"cve_id": "CVE-2026-7863", "product": "Core Banking Framework", "cvss": 6.5, "kev": false, "epss": 0.01742}, {"cve_id": "CVE-2024-2122", "product": "Cloud Database Engine", "cvss": 6.2, "kev": true, "epss": 0.86485}, {"cve_id": "CVE-2022-8114", "product": "Web Application Firewall", "cvss": 8.6, "kev": false, "epss": 0.01137}, {"cve_id": "CVE-2024-1504", "product": "Enterprise Router OS", "cvss": 9.2, "kev": false, "epss": 0.04009}, {"cve_id": "CVE-2022-5611", "product": "Cloud Database Engine", "cvss": 4.1, "kev": false, "epss": 0.03186}, {"cve_id": "CVE-2022-3141", "product": "Web Application Firewall", "cvss": 7.9, "kev": false, "epss": 0.91239}, {"cve_id": "CVE-2024-7287", "product": "Core Banking Framework", "cvss": 4.1, "kev": false, "epss": 0.69203}, {"cve_id": "CVE-2023-1995", "product": "Enterprise Router OS", "cvss": 6.4, "kev": false, "epss": 0.00578}, {"cve_id": "CVE-2025-1775", "product": "Enterprise Router OS", "cvss": 5.6, "kev": false, "epss": 0.03184}, {"cve_id": "CVE-2023-8509", "product": "Enterprise Router OS", "cvss": 6.5, "kev": false, "epss": 0.00282}, {"cve_id": "CVE-2022-8404", "product": "Identity Provider SaaS", "cvss": 4.5, "kev": false, "epss": 0.86921}, {"cve_id": "CVE-2022-5555", "product": "Embedded IoT Gateway", "cvss": 8.3, "kev": false, "epss": 0.02406}, {"cve_id": "CVE-2023-1262", "product": "Web Application Firewall", "cvss": 4.8, "kev": false, "epss": 0.02722}, {"cve_id": "CVE-2026-6745", "product": "Embedded IoT Gateway", "cvss": 4.3, "kev": false, "epss": 0.01705}, {"cve_id": "CVE-2023-2816", "product": "Cloud Database Engine", "cvss": 4.6, "kev": true, "epss": 0.79517}, {"cve_id": "CVE-2025-9002", "product": "Core Banking Framework", "cvss": 8.1, "kev": false, "epss": 0.04105}, {"cve_id": "CVE-2025-1728", "product": "Embedded IoT Gateway", "cvss": 8.2, "kev": false, "epss": 0.01837}, {"cve_id": "CVE-2022-9006", "product": "Identity Provider SaaS", "cvss": 9.5, "kev": false, "epss": 0.02258}, {"cve_id": "CVE-2023-7396", "product": "Web Application Firewall", "cvss": 9.7, "kev": false, "epss": 0.03807}, {"cve_id": "CVE-2023-2679", "product": "Enterprise Router OS", "cvss": 9.4, "kev": false, "epss": 0.00305}, {"cve_id": "CVE-2025-7235", "product": "Cloud Database Engine", "cvss": 7.5, "kev": false, "epss": 0.02392}, {"cve_id": "CVE-2025-4141", "product": "Core Banking Framework", "cvss": 8.4, "kev": false, "epss": 0.5868}, {"cve_id": "CVE-2025-2291", "product": "Web Application Firewall", "cvss": 4.3, "kev": false, "epss": 0.03241}, {"cve_id": "CVE-2024-3558", "product": "Identity Provider SaaS", "cvss": 7.4, "kev": false, "epss": 0.02675}, {"cve_id": "CVE-2026-5465", "product": "Embedded IoT Gateway", "cvss": 7.4, "kev": false, "epss": 0.03325}, {"cve_id": "CVE-2023-7303", "product": "Enterprise Router OS", "cvss": 9.3, "kev": false, "epss": 0.00171}, {"cve_id": "CVE-2025-6919", "product": "Cloud Database Engine", "cvss": 4.1, "kev": false, "epss": 0.04698}, {"cve_id": "CVE-2026-6745", "product": "Identity Provider SaaS", "cvss": 10.0, "kev": false, "epss": 0.0204}, {"cve_id": "CVE-2024-5171", "product": "Embedded IoT Gateway", "cvss": 7.8, "kev": false, "epss": 0.03853}, {"cve_id": "CVE-2026-2678", "product": "Web Application Firewall", "cvss": 4.0, "kev": false, "epss": 0.04271}, {"cve_id": "CVE-2026-2060", "product": "Web Application Firewall", "cvss": 7.5, "kev": false, "epss": 0.00273}, {"cve_id": "CVE-2022-8996", "product": "Identity Provider SaaS", "cvss": 9.7, "kev": false, "epss": 0.58395}, {"cve_id": "CVE-2022-5555", "product": "Web Application Firewall", "cvss": 7.7, "kev": false, "epss": 0.01197}, {"cve_id": "CVE-2026-1606", "product": "Core Banking Framework", "cvss": 7.9, "kev": false, "epss": 0.01192}, {"cve_id": "CVE-2025-1825", "product": "Enterprise Router OS", "cvss": 5.3, "kev": false, "epss": 0.01783}, {"cve_id": "CVE-2023-3539", "product": "Web Application Firewall", "cvss": 9.8, "kev": false, "epss": 0.04975}, {"cve_id": "CVE-2024-1863", "product": "Identity Provider SaaS", "cvss": 6.4, "kev": false, "epss": 0.00812}, {"cve_id": "CVE-2023-1784", "product": "Identity Provider SaaS", "cvss": 5.3, "kev": false, "epss": 0.02985}, {"cve_id": "CVE-2024-7287", "product": "Identity Provider SaaS", "cvss": 9.3, "kev": false, "epss": 0.90435}, {"cve_id": "CVE-2025-1825", "product": "Embedded IoT Gateway", "cvss": 4.2, "kev": false, "epss": 0.03689}, {"cve_id": "CVE-2026-9529", "product": "Embedded IoT Gateway", "cvss": 4.7, "kev": false, "epss": 0.00355}, {"cve_id": "CVE-2026-1417", "product": "Web Application Firewall", "cvss": 7.6, "kev": false, "epss": 0.03406}, {"cve_id": "CVE-2026-4440", "product": "Enterprise Router OS", "cvss": 9.3, "kev": false, "epss": 0.0426}, {"cve_id": "CVE-2023-8721", "product": "Enterprise Router OS", "cvss": 6.0, "kev": false, "epss": 0.00574}, {"cve_id": "CVE-2023-6854", "product": "Web Application Firewall", "cvss": 5.1, "kev": false, "epss": 0.02354}, {"cve_id": "CVE-2023-4843", "product": "Cloud Database Engine", "cvss": 4.8, "kev": false, "epss": 0.00846}, {"cve_id": "CVE-2026-5330", "product": "Web Application Firewall", "cvss": 8.5, "kev": false, "epss": 0.00466}, {"cve_id": "CVE-2023-6854", "product": "Enterprise Router OS", "cvss": 7.4, "kev": false, "epss": 0.00095}, {"cve_id": "CVE-2026-6801", "product": "Web Application Firewall", "cvss": 5.7, "kev": true, "epss": 0.59392}, {"cve_id": "CVE-2025-2484", "product": "Web Application Firewall", "cvss": 8.5, "kev": false, "epss": 0.03866}, {"cve_id": "CVE-2023-2066", "product": "Enterprise Router OS", "cvss": 8.6, "kev": false, "epss": 0.00337}, {"cve_id": "CVE-2024-5499", "product": "Identity Provider SaaS", "cvss": 9.1, "kev": false, "epss": 0.02257}, {"cve_id": "CVE-2025-8192", "product": "Identity Provider SaaS", "cvss": 7.6, "kev": false, "epss": 0.85863}, {"cve_id": "CVE-2022-4763", "product": "Identity Provider SaaS", "cvss": 5.5, "kev": true, "epss": 0.40808}, {"cve_id": "CVE-2025-1825", "product": "Core Banking Framework", "cvss": 9.7, "kev": false, "epss": 0.02659}, {"cve_id": "CVE-2026-7316", "product": "Core Banking Framework", "cvss": 5.8, "kev": false, "epss": 0.01189}, {"cve_id": "CVE-2025-1775", "product": "Identity Provider SaaS", "cvss": 9.7, "kev": false, "epss": 0.04721}, {"cve_id": "CVE-2022-2636", "product": "Web Application Firewall", "cvss": 8.6, "kev": false, "epss": 0.01638}, {"cve_id": "CVE-2023-3047", "product": "Cloud Database Engine", "cvss": 5.3, "kev": true, "epss": 0.74313}, {"cve_id": "CVE-2023-7396", "product": "Cloud Database Engine", "cvss": 9.2, "kev": false, "epss": 0.00968}, {"cve_id": "CVE-2026-2069", "product": "Core Banking Framework", "cvss": 8.7, "kev": false, "epss": 0.03817}, {"cve_id": "CVE-2024-7966", "product": "Embedded IoT Gateway", "cvss": 9.8, "kev": false, "epss": 0.00056}, {"cve_id": "CVE-2025-6301", "product": "Web Application Firewall", "cvss": 8.1, "kev": false, "epss": 0.02483}, {"cve_id": "CVE-2022-5000", "product": "Web Application Firewall", "cvss": 6.0, "kev": false, "epss": 0.04923}, {"cve_id": "CVE-2022-5611", "product": "Core Banking Framework", "cvss": 4.4, "kev": false, "epss": 0.0302}, {"cve_id": "CVE-2026-7873", "product": "Identity Provider SaaS", "cvss": 8.2, "kev": false, "epss": 0.00246}, {"cve_id": "CVE-2022-5000", "product": "Identity Provider SaaS", "cvss": 4.6, "kev": false, "epss": 0.00755}, {"cve_id": "CVE-2022-2853", "product": "Web Application Firewall", "cvss": 7.7, "kev": false, "epss": 0.00098}, {"cve_id": "CVE-2024-6191", "product": "Enterprise Router OS", "cvss": 4.5, "kev": false, "epss": 0.35343}, {"cve_id": "CVE-2023-2986", "product": "Cloud Database Engine", "cvss": 9.9, "kev": false, "epss": 0.04116}, {"cve_id": "CVE-2022-2959", "product": "Embedded IoT Gateway", "cvss": 4.6, "kev": false, "epss": 0.00206}, {"cve_id": "CVE-2022-2542", "product": "Enterprise Router OS", "cvss": 4.3, "kev": false, "epss": 0.04361}, {"cve_id": "CVE-2025-1004", "product": "Embedded IoT Gateway", "cvss": 8.8, "kev": false, "epss": 0.00447}, {"cve_id": "CVE-2022-2636", "product": "Embedded IoT Gateway", "cvss": 7.6, "kev": false, "epss": 0.00252}, {"cve_id": "CVE-2023-9308", "product": "Cloud Database Engine", "cvss": 6.6, "kev": false, "epss": 0.03269}, {"cve_id": "CVE-2026-8041", "product": "Core Banking Framework", "cvss": 7.7, "kev": false, "epss": 0.03734}, {"cve_id": "CVE-2026-5107", "product": "Core Banking Framework", "cvss": 8.0, "kev": false, "epss": 0.0361}, {"cve_id": "CVE-2022-1190", "product": "Core Banking Framework", "cvss": 10.0, "kev": false, "epss": 0.01038}, {"cve_id": "CVE-2025-2016", "product": "Core Banking Framework", "cvss": 4.4, "kev": true, "epss": 0.47522}, {"cve_id": "CVE-2024-3427", "product": "Cloud Database Engine", "cvss": 8.5, "kev": false, "epss": 0.01887}, {"cve_id": "CVE-2024-9838", "product": "Embedded IoT Gateway", "cvss": 4.2, "kev": false, "epss": 0.02221}, {"cve_id": "CVE-2024-1395", "product": "Identity Provider SaaS", "cvss": 5.7, "kev": false, "epss": 0.02356}, {"cve_id": "CVE-2026-6393", "product": "Enterprise Router OS", "cvss": 4.8, "kev": false, "epss": 0.00939}, {"cve_id": "CVE-2024-3558", "product": "Web Application Firewall", "cvss": 7.1, "kev": false, "epss": 0.59727}, {"cve_id": "CVE-2024-4152", "product": "Cloud Database Engine", "cvss": 9.1, "kev": true, "epss": 0.70012}, {"cve_id": "CVE-2023-6986", "product": "Core Banking Framework", "cvss": 5.4, "kev": false, "epss": 0.02238}, {"cve_id": "CVE-2022-2853", "product": "Cloud Database Engine", "cvss": 6.7, "kev": false, "epss": 0.60562}, {"cve_id": "CVE-2023-7938", "product": "Identity Provider SaaS", "cvss": 9.7, "kev": false, "epss": 0.01928}, {"cve_id": "CVE-2023-5736", "product": "Core Banking Framework", "cvss": 6.1, "kev": false, "epss": 0.03542}, {"cve_id": "CVE-2023-6442", "product": "Web Application Firewall", "cvss": 5.2, "kev": false, "epss": 0.00333}, {"cve_id": "CVE-2022-8114", "product": "Embedded IoT Gateway", "cvss": 4.3, "kev": false, "epss": 0.00941}, {"cve_id": "CVE-2023-8721", "product": "Core Banking Framework", "cvss": 4.6, "kev": false, "epss": 0.02017}, {"cve_id": "CVE-2024-9967", "product": "Identity Provider SaaS", "cvss": 6.9, "kev": false, "epss": 0.32038}, {"cve_id": "CVE-2024-2122", "product": "Embedded IoT Gateway", "cvss": 8.0, "kev": false, "epss": 0.75737}, {"cve_id": "CVE-2024-6578", "product": "Web Application Firewall", "cvss": 5.5, "kev": false, "epss": 0.01903}, {"cve_id": "CVE-2022-3049", "product": "Cloud Database Engine", "cvss": 7.7, "kev": false, "epss": 0.002}, {"cve_id": "CVE-2025-7190", "product": "Enterprise Router OS", "cvss": 5.3, "kev": false, "epss": 0.03274}, {"cve_id": "CVE-2024-6249", "product": "Web Application Firewall", "cvss": 7.9, "kev": false, "epss": 0.96448}, {"cve_id": "CVE-2025-7002", "product": "Enterprise Router OS", "cvss": 9.2, "kev": false, "epss": 0.03705}, {"cve_id": "CVE-2026-4072", "product": "Identity Provider SaaS", "cvss": 9.2, "kev": false, "epss": 0.03263}, {"cve_id": "CVE-2024-3427", "product": "Enterprise Router OS", "cvss": 6.2, "kev": false, "epss": 0.01973}, {"cve_id": "CVE-2026-1417", "product": "Enterprise Router OS", "cvss": 6.7, "kev": true, "epss": 0.6992}, {"cve_id": "CVE-2023-6534", "product": "Web Application Firewall", "cvss": 7.7, "kev": false, "epss": 0.04324}, {"cve_id": "CVE-2026-8158", "product": "Core Banking Framework", "cvss": 6.0, "kev": false, "epss": 0.02922}, {"cve_id": "CVE-2023-1539", "product": "Embedded IoT Gateway", "cvss": 7.6, "kev": false, "epss": 0.03605}, {"cve_id": "CVE-2026-6393", "product": "Identity Provider SaaS", "cvss": 4.0, "kev": false, "epss": 0.01255}, {"cve_id": "CVE-2026-8421", "product": "Identity Provider SaaS", "cvss": 4.4, "kev": false, "epss": 0.00552}, {"cve_id": "CVE-2022-4104", "product": "Web Application Firewall", "cvss": 5.8, "kev": false, "epss": 0.01591}, {"cve_id": "CVE-2023-8806", "product": "Cloud Database Engine", "cvss": 6.4, "kev": false, "epss": 0.02636}, {"cve_id": "CVE-2026-2191", "product": "Embedded IoT Gateway", "cvss": 5.1, "kev": false, "epss": 0.00579}, {"cve_id": "CVE-2023-4719", "product": "Embedded IoT Gateway", "cvss": 6.5, "kev": false, "epss": 0.01899}, {"cve_id": "CVE-2023-8509", "product": "Cloud Database Engine", "cvss": 4.7, "kev": true, "epss": 0.73383}, {"cve_id": "CVE-2025-4709", "product": "Web Application Firewall", "cvss": 7.6, "kev": false, "epss": 0.00915}, {"cve_id": "CVE-2022-2648", "product": "Core Banking Framework", "cvss": 9.4, "kev": false, "epss": 0.01315}, {"cve_id": "CVE-2024-4157", "product": "Cloud Database Engine", "cvss": 8.4, "kev": false, "epss": 0.04057}, {"cve_id": "CVE-2023-6986", "product": "Cloud Database Engine", "cvss": 6.7, "kev": false, "epss": 0.03698}, {"cve_id": "CVE-2026-5330", "product": "Identity Provider SaaS", "cvss": 7.6, "kev": false, "epss": 0.02257}, {"cve_id": "CVE-2022-2365", "product": "Identity Provider SaaS", "cvss": 9.9, "kev": false, "epss": 0.79255}, {"cve_id": "CVE-2026-3062", "product": "Core Banking Framework", "cvss": 4.5, "kev": false, "epss": 0.01}, {"cve_id": "CVE-2026-9754", "product": "Enterprise Router OS", "cvss": 5.4, "kev": false, "epss": 0.65296}, {"cve_id": "CVE-2025-7944", "product": "Embedded IoT Gateway", "cvss": 8.8, "kev": false, "epss": 0.04406}, {"cve_id": "CVE-2023-7184", "product": "Identity Provider SaaS", "cvss": 7.2, "kev": false, "epss": 0.03364}, {"cve_id": "CVE-2026-3738", "product": "Embedded IoT Gateway", "cvss": 8.0, "kev": false, "epss": 0.02353}, {"cve_id": "CVE-2023-7938", "product": "Web Application Firewall", "cvss": 7.4, "kev": false, "epss": 0.03466}, {"cve_id": "CVE-2024-3489", "product": "Cloud Database Engine", "cvss": 4.6, "kev": false, "epss": 0.0177}, {"cve_id": "CVE-2026-9754", "product": "Embedded IoT Gateway", "cvss": 6.8, "kev": false, "epss": 0.96243}, {"cve_id": "CVE-2022-8400", "product": "Core Banking Framework", "cvss": 8.4, "kev": false, "epss": 0.03374}, {"cve_id": "CVE-2026-5887", "product": "Embedded IoT Gateway", "cvss": 8.3, "kev": true, "epss": 0.50613}, {"cve_id": "CVE-2022-3049", "product": "Core Banking Framework", "cvss": 6.2, "kev": false, "epss": 0.02791}, {"cve_id": "CVE-2022-8339", "product": "Web Application Firewall", "cvss": 7.4, "kev": false, "epss": 0.02016}, {"cve_id": "CVE-2025-6625", "product": "Cloud Database Engine", "cvss": 7.8, "kev": false, "epss": 0.03621}, {"cve_id": "CVE-2025-7668", "product": "Embedded IoT Gateway", "cvss": 8.9, "kev": false, "epss": 0.40458}, {"cve_id": "CVE-2025-8390", "product": "Embedded IoT Gateway", "cvss": 7.4, "kev": false, "epss": 0.02423}, {"cve_id": "CVE-2025-7190", "product": "Embedded IoT Gateway", "cvss": 7.6, "kev": false, "epss": 0.04155}, {"cve_id": "CVE-2026-8041", "product": "Embedded IoT Gateway", "cvss": 4.5, "kev": false, "epss": 0.70412}, {"cve_id": "CVE-2023-4843", "product": "Web Application Firewall", "cvss": 9.3, "kev": false, "epss": 0.00052}, {"cve_id": "CVE-2026-1064", "product": "Web Application Firewall", "cvss": 7.6, "kev": false, "epss": 0.02844}, {"cve_id": "CVE-2026-6541", "product": "Enterprise Router OS", "cvss": 4.3, "kev": false, "epss": 0.77262}, {"cve_id": "CVE-2023-8554", "product": "Enterprise Router OS", "cvss": 4.9, "kev": false, "epss": 0.0055}, {"cve_id": "CVE-2022-2853", "product": "Embedded IoT Gateway", "cvss": 7.7, "kev": false, "epss": 0.01202}, {"cve_id": "CVE-2026-5107", "product": "Embedded IoT Gateway", "cvss": 7.9, "kev": false, "epss": 0.03971}, {"cve_id": "CVE-2023-1512", "product": "Web Application Firewall", "cvss": 7.9, "kev": false, "epss": 0.02434}, {"cve_id": "CVE-2025-1728", "product": "Core Banking Framework", "cvss": 8.6, "kev": true, "epss": 0.58298}, {"cve_id": "CVE-2023-2066", "product": "Core Banking Framework", "cvss": 4.1, "kev": false, "epss": 0.00729}, {"cve_id": "CVE-2026-2678", "product": "Core Banking Framework", "cvss": 4.1, "kev": false, "epss": 0.04018}, {"cve_id": "CVE-2023-8509", "product": "Embedded IoT Gateway", "cvss": 6.2, "kev": false, "epss": 0.02522}, {"cve_id": "CVE-2023-6305", "product": "Core Banking Framework", "cvss": 6.9, "kev": false, "epss": 0.037}, {"cve_id": "CVE-2023-6988", "product": "Identity Provider SaaS", "cvss": 6.3, "kev": false, "epss": 0.03936}, {"cve_id": "CVE-2023-9815", "product": "Enterprise Router OS", "cvss": 4.6, "kev": false, "epss": 0.04054}, {"cve_id": "CVE-2023-4627", "product": "Identity Provider SaaS", "cvss": 7.0, "kev": false, "epss": 0.01173}, {"cve_id": "CVE-2023-8509", "product": "Identity Provider SaaS", "cvss": 4.6, "kev": false, "epss": 0.00287}, {"cve_id": "CVE-2022-6188", "product": "Enterprise Router OS", "cvss": 8.5, "kev": false, "epss": 0.00572}, {"cve_id": "CVE-2024-2899", "product": "Core Banking Framework", "cvss": 7.1, "kev": false, "epss": 0.04958}, {"cve_id": "CVE-2024-1851", "product": "Identity Provider SaaS", "cvss": 5.1, "kev": false, "epss": 0.74901}, {"cve_id": "CVE-2025-7949", "product": "Cloud Database Engine", "cvss": 4.1, "kev": false, "epss": 0.01512}, {"cve_id": "CVE-2023-6305", "product": "Enterprise Router OS", "cvss": 9.9, "kev": false, "epss": 0.47368}, {"cve_id": "CVE-2024-2495", "product": "Enterprise Router OS", "cvss": 7.9, "kev": false, "epss": 0.95857}, {"cve_id": "CVE-2024-1699", "product": "Embedded IoT Gateway", "cvss": 5.8, "kev": false, "epss": 0.02933}, {"cve_id": "CVE-2026-6348", "product": "Embedded IoT Gateway", "cvss": 4.9, "kev": true, "epss": 0.37535}, {"cve_id": "CVE-2026-5465", "product": "Enterprise Router OS", "cvss": 6.2, "kev": false, "epss": 0.03084}, {"cve_id": "CVE-2023-7619", "product": "Embedded IoT Gateway", "cvss": 5.4, "kev": false, "epss": 0.0444}, {"cve_id": "CVE-2025-5199", "product": "Web Application Firewall", "cvss": 9.2, "kev": false, "epss": 0.01299}, {"cve_id": "CVE-2024-1699", "product": "Web Application Firewall", "cvss": 9.1, "kev": false, "epss": 0.03298}, {"cve_id": "CVE-2026-8421", "product": "Web Application Firewall", "cvss": 8.5, "kev": false, "epss": 0.03653}, {"cve_id": "CVE-2026-5330", "product": "Core Banking Framework", "cvss": 8.1, "kev": false, "epss": 0.02468}, {"cve_id": "CVE-2026-6855", "product": "Embedded IoT Gateway", "cvss": 8.4, "kev": false, "epss": 0.02566}, {"cve_id": "CVE-2024-1956", "product": "Core Banking Framework", "cvss": 5.0, "kev": false, "epss": 0.46774}, {"cve_id": "CVE-2023-3539", "product": "Identity Provider SaaS", "cvss": 10.0, "kev": false, "epss": 0.0401}, {"cve_id": "CVE-2025-9666", "product": "Enterprise Router OS", "cvss": 7.3, "kev": true, "epss": 0.81747}, {"cve_id": "CVE-2024-6056", "product": "Embedded IoT Gateway", "cvss": 8.5, "kev": false, "epss": 0.01871}, {"cve_id": "CVE-2024-8526", "product": "Identity Provider SaaS", "cvss": 9.1, "kev": false, "epss": 0.00667}, {"cve_id": "CVE-2023-1262", "product": "Core Banking Framework", "cvss": 7.9, "kev": false, "epss": 0.00732}, {"cve_id": "CVE-2026-8164", "product": "Core Banking Framework", "cvss": 4.0, "kev": false, "epss": 0.41348}, {"cve_id": "CVE-2023-9308", "product": "Enterprise Router OS", "cvss": 6.3, "kev": false, "epss": 0.02575}, {"cve_id": "CVE-2026-6734", "product": "Core Banking Framework", "cvss": 7.5, "kev": false, "epss": 0.03037}, {"cve_id": "CVE-2024-8343", "product": "Web Application Firewall", "cvss": 8.8, "kev": false, "epss": 0.02516}, {"cve_id": "CVE-2024-1851", "product": "Web Application Firewall", "cvss": 8.2, "kev": false, "epss": 0.01089}, {"cve_id": "CVE-2023-8805", "product": "Identity Provider SaaS", "cvss": 6.6, "kev": false, "epss": 0.02198}, {"cve_id": "CVE-2026-2060", "product": "Embedded IoT Gateway", "cvss": 4.4, "kev": false, "epss": 0.03681}, {"cve_id": "CVE-2023-2679", "product": "Web Application Firewall", "cvss": 8.5, "kev": false, "epss": 0.01055}, {"cve_id": "CVE-2024-1863", "product": "Cloud Database Engine", "cvss": 6.0, "kev": true, "epss": 0.31645}, {"cve_id": "CVE-2022-2062", "product": "Web Application Firewall", "cvss": 5.6, "kev": false, "epss": 0.04706}, {"cve_id": "CVE-2025-2016", "product": "Web Application Firewall", "cvss": 5.4, "kev": false, "epss": 0.0243}, {"cve_id": "CVE-2022-6864", "product": "Core Banking Framework", "cvss": 8.2, "kev": false, "epss": 0.91466}, {"cve_id": "CVE-2022-9352", "product": "Enterprise Router OS", "cvss": 4.0, "kev": true, "epss": 0.45315}, {"cve_id": "CVE-2022-2959", "product": "Web Application Firewall", "cvss": 4.2, "kev": false, "epss": 0.03946}, {"cve_id": "CVE-2025-7799", "product": "Cloud Database Engine", "cvss": 9.1, "kev": false, "epss": 0.04273}, {"cve_id": "CVE-2023-5736", "product": "Embedded IoT Gateway", "cvss": 7.7, "kev": false, "epss": 0.0161}, {"cve_id": "CVE-2026-1769", "product": "Web Application Firewall", "cvss": 9.4, "kev": true, "epss": 0.75138}, {"cve_id": "CVE-2026-6393", "product": "Cloud Database Engine", "cvss": 4.9, "kev": false, "epss": 0.01724}, {"cve_id": "CVE-2022-8560", "product": "Cloud Database Engine", "cvss": 8.3, "kev": false, "epss": 0.76495}, {"cve_id": "CVE-2022-5737", "product": "Enterprise Router OS", "cvss": 7.3, "kev": false, "epss": 0.02449}, {"cve_id": "CVE-2024-6578", "product": "Cloud Database Engine", "cvss": 8.0, "kev": false, "epss": 0.88615}, {"cve_id": "CVE-2022-1098", "product": "Web Application Firewall", "cvss": 5.7, "kev": false, "epss": 0.54206}, {"cve_id": "CVE-2022-5282", "product": "Identity Provider SaaS", "cvss": 8.7, "kev": false, "epss": 0.00865}, {"cve_id": "CVE-2024-4157", "product": "Web Application Firewall", "cvss": 8.5, "kev": true, "epss": 0.38585}, {"cve_id": "CVE-2022-4763", "product": "Web Application Firewall", "cvss": 5.0, "kev": false, "epss": 0.02823}, {"cve_id": "CVE-2023-4627", "product": "Cloud Database Engine", "cvss": 7.3, "kev": false, "epss": 0.53369}, {"cve_id": "CVE-2022-9006", "product": "Enterprise Router OS", "cvss": 6.3, "kev": false, "epss": 0.02286}, {"cve_id": "CVE-2025-1004", "product": "Identity Provider SaaS", "cvss": 8.7, "kev": false, "epss": 0.0264}, {"cve_id": "CVE-2023-7819", "product": "Embedded IoT Gateway", "cvss": 5.7, "kev": false, "epss": 0.01019}, {"cve_id": "CVE-2026-3914", "product": "Cloud Database Engine", "cvss": 4.9, "kev": false, "epss": 0.01618}, {"cve_id": "CVE-2024-7801", "product": "Identity Provider SaaS", "cvss": 5.7, "kev": false, "epss": 0.43737}, {"cve_id": "CVE-2025-7949", "product": "Core Banking Framework", "cvss": 8.4, "kev": false, "epss": 0.04003}, {"cve_id": "CVE-2022-3502", "product": "Identity Provider SaaS", "cvss": 9.3, "kev": false, "epss": 0.04837}, {"cve_id": "CVE-2026-7019", "product": "Core Banking Framework", "cvss": 9.9, "kev": false, "epss": 0.00871}, {"cve_id": "CVE-2025-7546", "product": "Cloud Database Engine", "cvss": 6.6, "kev": false, "epss": 0.68063}, {"cve_id": "CVE-2026-8004", "product": "Enterprise Router OS", "cvss": 8.9, "kev": false, "epss": 0.04869}, {"cve_id": "CVE-2023-2540", "product": "Embedded IoT Gateway", "cvss": 9.5, "kev": false, "epss": 0.04941}, {"cve_id": "CVE-2023-6442", "product": "Cloud Database Engine", "cvss": 4.6, "kev": false, "epss": 0.5366}, {"cve_id": "CVE-2024-8526", "product": "Enterprise Router OS", "cvss": 6.6, "kev": false, "epss": 0.04041}, {"cve_id": "CVE-2025-4486", "product": "Identity Provider SaaS", "cvss": 7.8, "kev": false, "epss": 0.01659}, {"cve_id": "CVE-2025-5946", "product": "Embedded IoT Gateway", "cvss": 8.1, "kev": false, "epss": 0.04959}, {"cve_id": "CVE-2026-6745", "product": "Enterprise Router OS", "cvss": 5.8, "kev": false, "epss": 0.04362}, {"cve_id": "CVE-2023-5859", "product": "Enterprise Router OS", "cvss": 8.7, "kev": false, "epss": 0.04541}, {"cve_id": "CVE-2026-1659", "product": "Core Banking Framework", "cvss": 7.3, "kev": false, "epss": 0.00598}, {"cve_id": "CVE-2023-8554", "product": "Web Application Firewall", "cvss": 9.5, "kev": false, "epss": 0.00139}, {"cve_id": "CVE-2025-8390", "product": "Enterprise Router OS", "cvss": 5.8, "kev": false, "epss": 0.0437}, {"cve_id": "CVE-2024-5499", "product": "Web Application Firewall", "cvss": 4.7, "kev": true, "epss": 0.47905}, {"cve_id": "CVE-2023-2540", "product": "Enterprise Router OS", "cvss": 6.8, "kev": false, "epss": 0.01521}, {"cve_id": "CVE-2023-9945", "product": "Enterprise Router OS", "cvss": 4.3, "kev": false, "epss": 0.03356}, {"cve_id": "CVE-2023-8806", "product": "Embedded IoT Gateway", "cvss": 7.5, "kev": false, "epss": 0.02631}, {"cve_id": "CVE-2026-5849", "product": "Core Banking Framework", "cvss": 7.6, "kev": false, "epss": 0.91855}, {"cve_id": "CVE-2025-2016", "product": "Enterprise Router OS", "cvss": 4.4, "kev": false, "epss": 0.77223}, {"cve_id": "CVE-2024-5413", "product": "Web Application Firewall", "cvss": 8.6, "kev": false, "epss": 0.02245}, {"cve_id": "CVE-2023-6988", "product": "Core Banking Framework", "cvss": 7.8, "kev": false, "epss": 0.01225}, {"cve_id": "CVE-2024-4152", "product": "Embedded IoT Gateway", "cvss": 6.3, "kev": false, "epss": 0.04755}, {"cve_id": "CVE-2024-8343", "product": "Identity Provider SaaS", "cvss": 8.5, "kev": false, "epss": 0.00401}, {"cve_id": "CVE-2024-9319", "product": "Cloud Database Engine", "cvss": 6.2, "kev": false, "epss": 0.39522}, {"cve_id": "CVE-2025-4510", "product": "Core Banking Framework", "cvss": 6.9, "kev": false, "epss": 0.01439}, {"cve_id": "CVE-2024-6249", "product": "Core Banking Framework", "cvss": 6.6, "kev": false, "epss": 0.0027}, {"cve_id": "CVE-2022-3967", "product": "Enterprise Router OS", "cvss": 8.9, "kev": false, "epss": 0.02681}, {"cve_id": "CVE-2023-3869", "product": "Web Application Firewall", "cvss": 5.0, "kev": false, "epss": 0.04417}, {"cve_id": "CVE-2022-7616", "product": "Embedded IoT Gateway", "cvss": 8.0, "kev": false, "epss": 0.04772}, {"cve_id": "CVE-2025-7949", "product": "Enterprise Router OS", "cvss": 7.8, "kev": true, "epss": 0.47517}, {"cve_id": "CVE-2026-3738", "product": "Enterprise Router OS", "cvss": 7.6, "kev": false, "epss": 0.56101}, {"cve_id": "CVE-2023-3869", "product": "Embedded IoT Gateway", "cvss": 6.2, "kev": false, "epss": 0.03768}, {"cve_id": "CVE-2024-9808", "product": "Embedded IoT Gateway", "cvss": 4.5, "kev": false, "epss": 0.03359}, {"cve_id": "CVE-2025-9680", "product": "Cloud Database Engine", "cvss": 6.2, "kev": false, "epss": 0.73255}, {"cve_id": "CVE-2022-8400", "product": "Enterprise Router OS", "cvss": 7.7, "kev": false, "epss": 0.00647}, {"cve_id": "CVE-2024-6191", "product": "Core Banking Framework", "cvss": 4.4, "kev": false, "epss": 0.30796}, {"cve_id": "CVE-2025-9702", "product": "Identity Provider SaaS", "cvss": 6.7, "kev": false, "epss": 0.04555}, {"cve_id": "CVE-2026-8208", "product": "Identity Provider SaaS", "cvss": 7.5, "kev": false, "epss": 0.03543}, {"cve_id": "CVE-2022-5780", "product": "Cloud Database Engine", "cvss": 5.0, "kev": false, "epss": 0.90527}, {"cve_id": "CVE-2022-8404", "product": "Embedded IoT Gateway", "cvss": 6.0, "kev": false, "epss": 0.00083}, {"cve_id": "CVE-2022-3961", "product": "Identity Provider SaaS", "cvss": 5.9, "kev": false, "epss": 0.01855}, {"cve_id": "CVE-2025-5548", "product": "Embedded IoT Gateway", "cvss": 7.4, "kev": false, "epss": 0.04862}, {"cve_id": "CVE-2025-7668", "product": "Identity Provider SaaS", "cvss": 4.8, "kev": false, "epss": 0.04632}, {"cve_id": "CVE-2024-2122", "product": "Identity Provider SaaS", "cvss": 4.1, "kev": false, "epss": 0.01482}, {"cve_id": "CVE-2025-5199", "product": "Core Banking Framework", "cvss": 6.2, "kev": false, "epss": 0.02248}, {"cve_id": "CVE-2024-9905", "product": "Embedded IoT Gateway", "cvss": 7.3, "kev": false, "epss": 0.008}, {"cve_id": "CVE-2022-7616", "product": "Web Application Firewall", "cvss": 7.2, "kev": false, "epss": 0.02731}, {"cve_id": "CVE-2026-3062", "product": "Cloud Database Engine", "cvss": 5.6, "kev": false, "epss": 0.53286}, {"cve_id": "CVE-2026-6393", "product": "Embedded IoT Gateway", "cvss": 9.0, "kev": false, "epss": 0.02936}, {"cve_id": "CVE-2022-1098", "product": "Identity Provider SaaS", "cvss": 4.9, "kev": false, "epss": 0.03923}, {"cve_id": "CVE-2022-5282", "product": "Embedded IoT Gateway", "cvss": 5.8, "kev": false, "epss": 0.02334}, {"cve_id": "CVE-2025-7949", "product": "Embedded IoT Gateway", "cvss": 9.1, "kev": false, "epss": 0.00705}, {"cve_id": "CVE-2026-2707", "product": "Core Banking Framework", "cvss": 7.6, "kev": false, "epss": 0.00238}, {"cve_id": "CVE-2022-3027", "product": "Cloud Database Engine", "cvss": 9.7, "kev": false, "epss": 0.04906}, {"cve_id": "CVE-2022-3143", "product": "Embedded IoT Gateway", "cvss": 9.2, "kev": false, "epss": 0.01465}, {"cve_id": "CVE-2024-6732", "product": "Identity Provider SaaS", "cvss": 7.1, "kev": false, "epss": 0.04335}, {"cve_id": "CVE-2023-2066", "product": "Cloud Database Engine", "cvss": 6.7, "kev": false, "epss": 0.04043}, {"cve_id": "CVE-2026-6801", "product": "Enterprise Router OS", "cvss": 4.4, "kev": true, "epss": 0.73533}, {"cve_id": "CVE-2024-9808", "product": "Identity Provider SaaS", "cvss": 5.9, "kev": false, "epss": 0.96064}, {"cve_id": "CVE-2022-2931", "product": "Cloud Database Engine", "cvss": 6.9, "kev": false, "epss": 0.03478}, {"cve_id": "CVE-2023-4719", "product": "Web Application Firewall", "cvss": 7.9, "kev": false, "epss": 0.03679}, {"cve_id": "CVE-2026-5910", "product": "Enterprise Router OS", "cvss": 8.8, "kev": false, "epss": 0.04974}, {"cve_id": "CVE-2025-4073", "product": "Identity Provider SaaS", "cvss": 8.4, "kev": false, "epss": 0.00757}, {"cve_id": "CVE-2023-1512", "product": "Enterprise Router OS", "cvss": 8.3, "kev": false, "epss": 0.00171}, {"cve_id": "CVE-2022-6463", "product": "Core Banking Framework", "cvss": 4.6, "kev": false, "epss": 0.00609}, {"cve_id": "CVE-2024-8343", "product": "Cloud Database Engine", "cvss": 5.5, "kev": false, "epss": 0.78287}, {"cve_id": "CVE-2025-2693", "product": "Embedded IoT Gateway", "cvss": 9.2, "kev": false, "epss": 0.00804}, {"cve_id": "CVE-2023-8806", "product": "Core Banking Framework", "cvss": 4.2, "kev": false, "epss": 0.0381}, {"cve_id": "CVE-2023-4843", "product": "Enterprise Router OS", "cvss": 8.3, "kev": false, "epss": 0.04116}, {"cve_id": "CVE-2026-3731", "product": "Web Application Firewall", "cvss": 7.4, "kev": false, "epss": 0.03617}, {"cve_id": "CVE-2025-2353", "product": "Enterprise Router OS", "cvss": 4.4, "kev": false, "epss": 0.46784}, {"cve_id": "CVE-2023-8455", "product": "Embedded IoT Gateway", "cvss": 4.6, "kev": false, "epss": 0.04221}, {"cve_id": "CVE-2026-1659", "product": "Cloud Database Engine", "cvss": 9.4, "kev": false, "epss": 0.01918}, {"cve_id": "CVE-2025-9002", "product": "Cloud Database Engine", "cvss": 4.8, "kev": false, "epss": 0.00955}, {"cve_id": "CVE-2023-8513", "product": "Embedded IoT Gateway", "cvss": 4.8, "kev": false, "epss": 0.01381}, {"cve_id": "CVE-2024-1851", "product": "Embedded IoT Gateway", "cvss": 10.0, "kev": false, "epss": 0.01956}, {"cve_id": "CVE-2025-6625", "product": "Identity Provider SaaS", "cvss": 8.4, "kev": false, "epss": 0.03782}, {"cve_id": "CVE-2026-6745", "product": "Core Banking Framework", "cvss": 4.3, "kev": false, "epss": 0.01375}, {"cve_id": "CVE-2026-3731", "product": "Cloud Database Engine", "cvss": 4.1, "kev": false, "epss": 0.00146}, {"cve_id": "CVE-2026-5893", "product": "Identity Provider SaaS", "cvss": 7.0, "kev": false, "epss": 0.02996}, {"cve_id": "CVE-2023-8513", "product": "Core Banking Framework", "cvss": 6.8, "kev": false, "epss": 0.03404}, {"cve_id": "CVE-2024-3255", "product": "Embedded IoT Gateway", "cvss": 5.6, "kev": false, "epss": 0.88285}, {"cve_id": "CVE-2024-7966", "product": "Cloud Database Engine", "cvss": 8.6, "kev": false, "epss": 0.4806}, {"cve_id": "CVE-2026-1417", "product": "Core Banking Framework", "cvss": 6.1, "kev": false, "epss": 0.03227}, {"cve_id": "CVE-2023-7396", "product": "Identity Provider SaaS", "cvss": 8.0, "kev": false, "epss": 0.03394}, {"cve_id": "CVE-2023-8721", "product": "Embedded IoT Gateway", "cvss": 9.4, "kev": false, "epss": 0.03036}, {"cve_id": "CVE-2023-3849", "product": "Embedded IoT Gateway", "cvss": 6.8, "kev": true, "epss": 0.9513}, {"cve_id": "CVE-2023-7619", "product": "Enterprise Router OS", "cvss": 5.2, "kev": false, "epss": 0.04486}, {"cve_id": "CVE-2026-8041", "product": "Cloud Database Engine", "cvss": 5.9, "kev": false, "epss": 0.0266}, {"cve_id": "CVE-2024-4157", "product": "Embedded IoT Gateway", "cvss": 7.9, "kev": false, "epss": 0.0172}, {"cve_id": "CVE-2024-6578", "product": "Embedded IoT Gateway", "cvss": 7.8, "kev": false, "epss": 0.9514}, {"cve_id": "CVE-2023-7303", "product": "Web Application Firewall", "cvss": 7.3, "kev": false, "epss": 0.41271}, {"cve_id": "CVE-2025-4510", "product": "Embedded IoT Gateway", "cvss": 9.4, "kev": false, "epss": 0.97659}, {"cve_id": "CVE-2025-6588", "product": "Identity Provider SaaS", "cvss": 9.9, "kev": false, "epss": 0.02213}, {"cve_id": "CVE-2024-4556", "product": "Web Application Firewall", "cvss": 7.7, "kev": false, "epss": 0.03973}, {"cve_id": "CVE-2025-1717", "product": "Core Banking Framework", "cvss": 9.1, "kev": false, "epss": 0.01199}, {"cve_id": "CVE-2024-1225", "product": "Core Banking Framework", "cvss": 4.1, "kev": false, "epss": 0.01182}, {"cve_id": "CVE-2024-4769", "product": "Core Banking Framework", "cvss": 5.3, "kev": false, "epss": 0.03658}, {"cve_id": "CVE-2026-2707", "product": "Web Application Firewall", "cvss": 6.6, "kev": true, "epss": 0.62701}, {"cve_id": "CVE-2024-8683", "product": "Core Banking Framework", "cvss": 4.7, "kev": false, "epss": 0.04602}, {"cve_id": "CVE-2026-6801", "product": "Identity Provider SaaS", "cvss": 9.7, "kev": false, "epss": 0.03948}, {"cve_id": "CVE-2025-5548", "product": "Core Banking Framework", "cvss": 7.4, "kev": false, "epss": 0.0124}, {"cve_id": "CVE-2024-5488", "product": "Cloud Database Engine", "cvss": 9.5, "kev": false, "epss": 0.01143}, {"cve_id": "CVE-2025-9680", "product": "Core Banking Framework", "cvss": 4.2, "kev": false, "epss": 0.01448}, {"cve_id": "CVE-2022-6029", "product": "Identity Provider SaaS", "cvss": 5.7, "kev": false, "epss": 0.04735}, {"cve_id": "CVE-2025-9571", "product": "Core Banking Framework", "cvss": 6.5, "kev": false, "epss": 0.02513}, {"cve_id": "CVE-2022-2931", "product": "Embedded IoT Gateway", "cvss": 8.2, "kev": false, "epss": 0.008}, {"cve_id": "CVE-2026-5893", "product": "Web Application Firewall", "cvss": 4.1, "kev": false, "epss": 0.00307}, {"cve_id": "CVE-2025-4073", "product": "Web Application Firewall", "cvss": 8.9, "kev": false, "epss": 0.00671}, {"cve_id": "CVE-2024-6618", "product": "Web Application Firewall", "cvss": 6.4, "kev": false, "epss": 0.02735}, {"cve_id": "CVE-2022-2062", "product": "Enterprise Router OS", "cvss": 5.6, "kev": false, "epss": 0.0184}, {"cve_id": "CVE-2022-1391", "product": "Embedded IoT Gateway", "cvss": 7.8, "kev": false, "epss": 0.03915}, {"cve_id": "CVE-2022-7585", "product": "Cloud Database Engine", "cvss": 8.8, "kev": false, "epss": 0.01711}, {"cve_id": "CVE-2024-5171", "product": "Identity Provider SaaS", "cvss": 4.7, "kev": false, "epss": 0.02205}, {"cve_id": "CVE-2023-8805", "product": "Enterprise Router OS", "cvss": 5.9, "kev": false, "epss": 0.01967}, {"cve_id": "CVE-2026-1064", "product": "Embedded IoT Gateway", "cvss": 4.7, "kev": false, "epss": 0.04224}, {"cve_id": "CVE-2025-1717", "product": "Embedded IoT Gateway", "cvss": 7.4, "kev": false, "epss": 0.02695}, {"cve_id": "CVE-2025-3368", "product": "Identity Provider SaaS", "cvss": 6.6, "kev": false, "epss": 0.00637}, {"cve_id": "CVE-2022-9787", "product": "Web Application Firewall", "cvss": 7.3, "kev": false, "epss": 0.8884}, {"cve_id": "CVE-2026-1606", "product": "Embedded IoT Gateway", "cvss": 7.8, "kev": false, "epss": 0.02533}, {"cve_id": "CVE-2023-7303", "product": "Embedded IoT Gateway", "cvss": 8.0, "kev": true, "epss": 0.67322}, {"cve_id": "CVE-2022-3961", "product": "Core Banking Framework", "cvss": 5.8, "kev": false, "epss": 0.01704}, {"cve_id": "CVE-2026-8385", "product": "Embedded IoT Gateway", "cvss": 6.4, "kev": true, "epss": 0.83296}, {"cve_id": "CVE-2023-7184", "product": "Enterprise Router OS", "cvss": 8.1, "kev": false, "epss": 0.55427}, {"cve_id": "CVE-2025-7190", "product": "Core Banking Framework", "cvss": 8.7, "kev": false, "epss": 0.83108}, {"cve_id": "CVE-2024-1956", "product": "Web Application Firewall", "cvss": 7.6, "kev": false, "epss": 0.04709}, {"cve_id": "CVE-2026-8385", "product": "Cloud Database Engine", "cvss": 6.7, "kev": false, "epss": 0.67249}, {"cve_id": "CVE-2025-7002", "product": "Core Banking Framework", "cvss": 5.1, "kev": false, "epss": 0.02623}, {"cve_id": "CVE-2025-6450", "product": "Identity Provider SaaS", "cvss": 7.6, "kev": false, "epss": 0.03172}, {"cve_id": "CVE-2024-1504", "product": "Cloud Database Engine", "cvss": 8.1, "kev": false, "epss": 0.00902}, {"cve_id": "CVE-2026-8164", "product": "Embedded IoT Gateway", "cvss": 5.8, "kev": false, "epss": 0.03137}, {"cve_id": "CVE-2022-4376", "product": "Web Application Firewall", "cvss": 9.8, "kev": false, "epss": 0.03548}, {"cve_id": "CVE-2022-1391", "product": "Web Application Firewall", "cvss": 5.9, "kev": false, "epss": 0.04337}, {"cve_id": "CVE-2026-2678", "product": "Identity Provider SaaS", "cvss": 4.6, "kev": false, "epss": 0.03696}, {"cve_id": "CVE-2023-4627", "product": "Enterprise Router OS", "cvss": 4.1, "kev": false, "epss": 0.02279}, {"cve_id": "CVE-2026-5893", "product": "Embedded IoT Gateway", "cvss": 8.4, "kev": false, "epss": 0.01113}, {"cve_id": "CVE-2023-3869", "product": "Enterprise Router OS", "cvss": 6.6, "kev": false, "epss": 0.03631}, {"cve_id": "CVE-2025-3368", "product": "Enterprise Router OS", "cvss": 8.9, "kev": true, "epss": 0.91983}, {"cve_id": "CVE-2026-7019", "product": "Enterprise Router OS", "cvss": 5.3, "kev": false, "epss": 0.0036}, {"cve_id": "CVE-2026-5893", "product": "Cloud Database Engine", "cvss": 8.8, "kev": false, "epss": 0.02744}, {"cve_id": "CVE-2022-5777", "product": "Identity Provider SaaS", "cvss": 7.7, "kev": false, "epss": 0.02631}, {"cve_id": "CVE-2024-5488", "product": "Identity Provider SaaS", "cvss": 7.8, "kev": false, "epss": 0.02698}, {"cve_id": "CVE-2024-6177", "product": "Enterprise Router OS", "cvss": 5.2, "kev": false, "epss": 0.02374}, {"cve_id": "CVE-2022-2648", "product": "Enterprise Router OS", "cvss": 9.5, "kev": false, "epss": 0.03943}, {"cve_id": "CVE-2025-3693", "product": "Enterprise Router OS", "cvss": 5.9, "kev": false, "epss": 0.02701}, {"cve_id": "CVE-2025-4709", "product": "Core Banking Framework", "cvss": 6.1, "kev": false, "epss": 0.01574}, {"cve_id": "CVE-2026-7873", "product": "Core Banking Framework", "cvss": 6.0, "kev": false, "epss": 0.04709}, {"cve_id": "CVE-2023-1197", "product": "Enterprise Router OS", "cvss": 4.6, "kev": false, "epss": 0.02541}, {"cve_id": "CVE-2022-1190", "product": "Enterprise Router OS", "cvss": 9.2, "kev": false, "epss": 0.04301}, {"cve_id": "CVE-2022-5000", "product": "Enterprise Router OS", "cvss": 5.0, "kev": false, "epss": 0.03485}, {"cve_id": "CVE-2025-7287", "product": "Core Banking Framework", "cvss": 5.0, "kev": true, "epss": 0.78874}, {"cve_id": "CVE-2025-6073", "product": "Cloud Database Engine", "cvss": 9.3, "kev": false, "epss": 0.02932}, {"cve_id": "CVE-2024-8343", "product": "Enterprise Router OS", "cvss": 5.3, "kev": false, "epss": 0.01256}, {"cve_id": "CVE-2023-3869", "product": "Identity Provider SaaS", "cvss": 6.0, "kev": false, "epss": 0.04932}, {"cve_id": "CVE-2024-1225", "product": "Enterprise Router OS", "cvss": 6.6, "kev": false, "epss": 0.03526}, {"cve_id": "CVE-2022-1391", "product": "Enterprise Router OS", "cvss": 7.0, "kev": false, "epss": 0.04903}, {"cve_id": "CVE-2022-8404", "product": "Enterprise Router OS", "cvss": 7.7, "kev": false, "epss": 0.0207}, {"cve_id": "CVE-2025-2585", "product": "Core Banking Framework", "cvss": 5.3, "kev": false, "epss": 0.0367}, {"cve_id": "CVE-2022-2306", "product": "Enterprise Router OS", "cvss": 6.8, "kev": false, "epss": 0.00681}, {"cve_id": "CVE-2022-1391", "product": "Cloud Database Engine", "cvss": 4.4, "kev": false, "epss": 0.02732}, {"cve_id": "CVE-2024-3703", "product": "Embedded IoT Gateway", "cvss": 7.3, "kev": false, "epss": 0.02591}, {"cve_id": "CVE-2024-9838", "product": "Core Banking Framework", "cvss": 7.4, "kev": false, "epss": 0.01785}, {"cve_id": "CVE-2025-9571", "product": "Identity Provider SaaS", "cvss": 8.2, "kev": false, "epss": 0.00274}, {"cve_id": "CVE-2023-5736", "product": "Identity Provider SaaS", "cvss": 6.3, "kev": false, "epss": 0.01898}, {"cve_id": "CVE-2024-2409", "product": "Embedded IoT Gateway", "cvss": 4.6, "kev": false, "epss": 0.69509}, {"cve_id": "CVE-2022-3141", "product": "Cloud Database Engine", "cvss": 7.3, "kev": false, "epss": 0.03403}, {"cve_id": "CVE-2022-5611", "product": "Identity Provider SaaS", "cvss": 8.0, "kev": false, "epss": 0.00891}, {"cve_id": "CVE-2025-4709", "product": "Cloud Database Engine", "cvss": 9.3, "kev": false, "epss": 0.00825}, {"cve_id": "CVE-2025-6919", "product": "Core Banking Framework", "cvss": 8.3, "kev": false, "epss": 0.01603}, {"cve_id": "CVE-2023-7905", "product": "Enterprise Router OS", "cvss": 7.5, "kev": false, "epss": 0.02281}, {"cve_id": "CVE-2023-9945", "product": "Core Banking Framework", "cvss": 5.9, "kev": false, "epss": 0.03488}, {"cve_id": "CVE-2022-2324", "product": "Identity Provider SaaS", "cvss": 7.6, "kev": false, "epss": 0.04084}, {"cve_id": "CVE-2026-4072", "product": "Web Application Firewall", "cvss": 8.7, "kev": false, "epss": 0.00796}, {"cve_id": "CVE-2023-8330", "product": "Core Banking Framework", "cvss": 5.6, "kev": true, "epss": 0.89785}, {"cve_id": "CVE-2026-6801", "product": "Core Banking Framework", "cvss": 7.8, "kev": false, "epss": 0.02173}, {"cve_id": "CVE-2023-9932", "product": "Core Banking Framework", "cvss": 6.6, "kev": false, "epss": 0.80864}, {"cve_id": "CVE-2025-7799", "product": "Core Banking Framework", "cvss": 4.4, "kev": false, "epss": 0.01667}, {"cve_id": "CVE-2026-5175", "product": "Identity Provider SaaS", "cvss": 8.8, "kev": false, "epss": 0.01245}, {"cve_id": "CVE-2022-8339", "product": "Core Banking Framework", "cvss": 5.9, "kev": false, "epss": 0.04253}, {"cve_id": "CVE-2022-9053", "product": "Web Application Firewall", "cvss": 4.1, "kev": false, "epss": 0.03823}, {"cve_id": "CVE-2026-5465", "product": "Identity Provider SaaS", "cvss": 4.0, "kev": false, "epss": 0.02042}, {"cve_id": "CVE-2024-9319", "product": "Embedded IoT Gateway", "cvss": 7.4, "kev": false, "epss": 0.01889}, {"cve_id": "CVE-2024-4152", "product": "Core Banking Framework", "cvss": 7.8, "kev": false, "epss": 0.02496}, {"cve_id": "CVE-2022-3502", "product": "Enterprise Router OS", "cvss": 6.8, "kev": false, "epss": 0.04749}, {"cve_id": "CVE-2024-5496", "product": "Enterprise Router OS", "cvss": 7.9, "kev": false, "epss": 0.67719}, {"cve_id": "CVE-2026-8574", "product": "Embedded IoT Gateway", "cvss": 6.5, "kev": false, "epss": 0.69421}, {"cve_id": "CVE-2023-8721", "product": "Identity Provider SaaS", "cvss": 6.7, "kev": false, "epss": 0.04556}, {"cve_id": "CVE-2024-3703", "product": "Web Application Firewall", "cvss": 7.5, "kev": false, "epss": 0.00307}, {"cve_id": "CVE-2025-3205", "product": "Web Application Firewall", "cvss": 8.0, "kev": false, "epss": 0.04436}, {"cve_id": "CVE-2023-6854", "product": "Core Banking Framework", "cvss": 8.8, "kev": false, "epss": 0.43638}, {"cve_id": "CVE-2022-8114", "product": "Cloud Database Engine", "cvss": 8.1, "kev": false, "epss": 0.04707}, {"cve_id": "CVE-2023-9945", "product": "Web Application Firewall", "cvss": 6.0, "kev": true, "epss": 0.96323}, {"cve_id": "CVE-2025-6301", "product": "Cloud Database Engine", "cvss": 9.6, "kev": false, "epss": 0.00402}, {"cve_id": "CVE-2022-4104", "product": "Core Banking Framework", "cvss": 7.2, "kev": false, "epss": 0.00616}, {"cve_id": "CVE-2023-5859", "product": "Embedded IoT Gateway", "cvss": 6.1, "kev": false, "epss": 0.44314}, {"cve_id": "CVE-2022-5737", "product": "Embedded IoT Gateway", "cvss": 4.9, "kev": false, "epss": 0.00817}, {"cve_id": "CVE-2023-7619", "product": "Cloud Database Engine", "cvss": 9.0, "kev": false, "epss": 0.00822}, {"cve_id": "CVE-2023-8805", "product": "Web Application Firewall", "cvss": 8.7, "kev": false, "epss": 0.00066}, {"cve_id": "CVE-2026-2069", "product": "Enterprise Router OS", "cvss": 6.8, "kev": false, "epss": 0.00332}, {"cve_id": "CVE-2025-2693", "product": "Cloud Database Engine", "cvss": 6.8, "kev": false, "epss": 0.03353}, {"cve_id": "CVE-2022-2959", "product": "Core Banking Framework", "cvss": 9.9, "kev": false, "epss": 0.01016}, {"cve_id": "CVE-2025-2291", "product": "Core Banking Framework", "cvss": 8.4, "kev": false, "epss": 0.04199}, {"cve_id": "CVE-2023-6486", "product": "Identity Provider SaaS", "cvss": 8.8, "kev": false, "epss": 0.0211}, {"cve_id": "CVE-2026-1663", "product": "Enterprise Router OS", "cvss": 7.1, "kev": false, "epss": 0.04853}, {"cve_id": "CVE-2023-6592", "product": "Enterprise Router OS", "cvss": 8.4, "kev": false, "epss": 0.8812}, {"cve_id": "CVE-2026-3931", "product": "Core Banking Framework", "cvss": 7.5, "kev": false, "epss": 0.03939}, {"cve_id": "CVE-2026-8266", "product": "Embedded IoT Gateway", "cvss": 5.5, "kev": false, "epss": 0.89205}, {"cve_id": "CVE-2022-3049", "product": "Enterprise Router OS", "cvss": 7.8, "kev": false, "epss": 0.02319}, {"cve_id": "CVE-2023-1262", "product": "Identity Provider SaaS", "cvss": 7.5, "kev": true, "epss": 0.82531}, {"cve_id": "CVE-2026-5107", "product": "Web Application Firewall", "cvss": 9.0, "kev": false, "epss": 0.43902}, {"cve_id": "CVE-2024-9110", "product": "Enterprise Router OS", "cvss": 7.1, "kev": false, "epss": 0.02574}, {"cve_id": "CVE-2026-3731", "product": "Embedded IoT Gateway", "cvss": 5.7, "kev": false, "epss": 0.04982}, {"cve_id": "CVE-2026-4440", "product": "Web Application Firewall", "cvss": 9.5, "kev": false, "epss": 0.03493}, {"cve_id": "CVE-2023-5736", "product": "Cloud Database Engine", "cvss": 6.4, "kev": false, "epss": 0.82548}, {"cve_id": "CVE-2024-1699", "product": "Identity Provider SaaS", "cvss": 5.8, "kev": true, "epss": 0.73322}, {"cve_id": "CVE-2026-8400", "product": "Embedded IoT Gateway", "cvss": 6.1, "kev": false, "epss": 0.02305}, {"cve_id": "CVE-2024-5488", "product": "Enterprise Router OS", "cvss": 8.2, "kev": false, "epss": 0.01594}, {"cve_id": "CVE-2026-3914", "product": "Identity Provider SaaS", "cvss": 9.1, "kev": false, "epss": 0.02728}, {"cve_id": "CVE-2025-7668", "product": "Cloud Database Engine", "cvss": 4.0, "kev": true, "epss": 0.91524}, {"cve_id": "CVE-2025-7420", "product": "Identity Provider SaaS", "cvss": 9.4, "kev": false, "epss": 0.00325}, {"cve_id": "CVE-2022-8996", "product": "Embedded IoT Gateway", "cvss": 5.9, "kev": false, "epss": 0.00994}, {"cve_id": "CVE-2023-8806", "product": "Identity Provider SaaS", "cvss": 6.1, "kev": false, "epss": 0.00643}, {"cve_id": "CVE-2025-2353", "product": "Core Banking Framework", "cvss": 7.0, "kev": false, "epss": 0.02198}, {"cve_id": "CVE-2025-4709", "product": "Enterprise Router OS", "cvss": 6.3, "kev": false, "epss": 0.44818}, {"cve_id": "CVE-2026-2707", "product": "Cloud Database Engine", "cvss": 4.6, "kev": false, "epss": 0.03513}, {"cve_id": "CVE-2025-9571", "product": "Cloud Database Engine", "cvss": 7.4, "kev": false, "epss": 0.47268}, {"cve_id": "CVE-2023-8805", "product": "Core Banking Framework", "cvss": 4.6, "kev": true, "epss": 0.54585}, {"cve_id": "CVE-2023-9308", "product": "Identity Provider SaaS", "cvss": 8.0, "kev": false, "epss": 0.41732}, {"cve_id": "CVE-2025-5380", "product": "Cloud Database Engine", "cvss": 8.8, "kev": true, "epss": 0.83179}, {"cve_id": "CVE-2023-7619", "product": "Core Banking Framework", "cvss": 7.7, "kev": false, "epss": 0.01828}, {"cve_id": "CVE-2022-5611", "product": "Web Application Firewall", "cvss": 6.9, "kev": false, "epss": 0.04038}, {"cve_id": "CVE-2024-2899", "product": "Web Application Firewall", "cvss": 5.3, "kev": false, "epss": 0.02437}, {"cve_id": "CVE-2022-2542", "product": "Identity Provider SaaS", "cvss": 5.3, "kev": false, "epss": 0.04127}, {"cve_id": "CVE-2026-1133", "product": "Core Banking Framework", "cvss": 6.8, "kev": false, "epss": 0.00637}, {"cve_id": "CVE-2023-2679", "product": "Identity Provider SaaS", "cvss": 7.9, "kev": false, "epss": 0.03588}, {"cve_id": "CVE-2025-9666", "product": "Embedded IoT Gateway", "cvss": 4.7, "kev": false, "epss": 0.03326}, {"cve_id": "CVE-2026-1659", "product": "Identity Provider SaaS", "cvss": 6.4, "kev": false, "epss": 0.03079}, {"cve_id": "CVE-2026-2069", "product": "Identity Provider SaaS", "cvss": 9.8, "kev": false, "epss": 0.02682}, {"cve_id": "CVE-2024-3489", "product": "Embedded IoT Gateway", "cvss": 9.4, "kev": false, "epss": 0.02615}, {"cve_id": "CVE-2026-4343", "product": "Identity Provider SaaS", "cvss": 5.4, "kev": false, "epss": 0.04793}, {"cve_id": "CVE-2022-6463", "product": "Cloud Database Engine", "cvss": 9.3, "kev": false, "epss": 0.03195}, {"cve_id": "CVE-2026-5910", "product": "Cloud Database Engine", "cvss": 5.9, "kev": true, "epss": 0.83106}, {"cve_id": "CVE-2025-2484", "product": "Cloud Database Engine", "cvss": 8.9, "kev": false, "epss": 0.02724}, {"cve_id": "CVE-2026-2060", "product": "Cloud Database Engine", "cvss": 7.1, "kev": false, "epss": 0.0166}, {"cve_id": "CVE-2022-2959", "product": "Identity Provider SaaS", "cvss": 8.3, "kev": false, "epss": 0.01208}, {"cve_id": "CVE-2025-8192", "product": "Cloud Database Engine", "cvss": 4.2, "kev": false, "epss": 0.03456}, {"cve_id": "CVE-2023-9815", "product": "Identity Provider SaaS", "cvss": 9.6, "kev": false, "epss": 0.01152}, {"cve_id": "CVE-2026-8041", "product": "Web Application Firewall", "cvss": 5.0, "kev": false, "epss": 0.4598}, {"cve_id": "CVE-2022-1698", "product": "Core Banking Framework", "cvss": 9.7, "kev": false, "epss": 0.01435}, {"cve_id": "CVE-2026-5330", "product": "Embedded IoT Gateway", "cvss": 4.2, "kev": false, "epss": 0.02129}, {"cve_id": "CVE-2024-1395", "product": "Cloud Database Engine", "cvss": 9.1, "kev": false, "epss": 0.03919}, {"cve_id": "CVE-2022-6917", "product": "Cloud Database Engine", "cvss": 7.5, "kev": false, "epss": 0.02744}, {"cve_id": "CVE-2026-1133", "product": "Web Application Firewall", "cvss": 5.2, "kev": false, "epss": 0.00859}, {"cve_id": "CVE-2025-4141", "product": "Cloud Database Engine", "cvss": 8.0, "kev": false, "epss": 0.03651}, {"cve_id": "CVE-2026-1412", "product": "Web Application Firewall", "cvss": 7.3, "kev": false, "epss": 0.01517}, {"cve_id": "CVE-2026-7316", "product": "Embedded IoT Gateway", "cvss": 8.4, "kev": false, "epss": 0.00672}, {"cve_id": "CVE-2026-2060", "product": "Core Banking Framework", "cvss": 9.0, "kev": false, "epss": 0.04024}, {"cve_id": "CVE-2023-7184", "product": "Cloud Database Engine", "cvss": 4.3, "kev": false, "epss": 0.00456}, {"cve_id": "CVE-2023-1539", "product": "Cloud Database Engine", "cvss": 4.2, "kev": false, "epss": 0.00631}, {"cve_id": "CVE-2024-2409", "product": "Identity Provider SaaS", "cvss": 7.5, "kev": false, "epss": 0.02365}, {"cve_id": "CVE-2023-9932", "product": "Embedded IoT Gateway", "cvss": 6.7, "kev": false, "epss": 0.02529}, {"cve_id": "CVE-2025-3747", "product": "Web Application Firewall", "cvss": 4.1, "kev": false, "epss": 0.00689}, {"cve_id": "CVE-2023-1466", "product": "Cloud Database Engine", "cvss": 7.1, "kev": false, "epss": 0.02487}];
+
+
+
+// Organisation profiles: alias-aware matching + exposure/importance signals
+
+window.ORGANIZATIONS = [
+
+  {
+
+    "org_id": "ORG-001",
+
+    "name": "Global Retail Bank",
+
+    "sector": "Financial Services",
+
+    "risk_appetite": "Low",
+
+    "exposure": "Internet-facing",
+
+    "service_importance": "Critical",
+
+    "weight_modifiers": {
+
+      "cvss_weight": 0.3,
+
+      "cisa_kev_weight": 0.45,
+
+      "first_epss_weight": 0.25
+
+    },
+
+    "critical_products": [
+
+      "Core Banking Framework",
+
+      "Identity Provider SaaS"
+
+    ],
+
+    "business_services": {
+
+      "Core Banking Framework": "core banking platform",
+
+      "Identity Provider SaaS": "customer & staff identity login"
+
+    }
+
+  },
+
+  {
+
+    "org_id": "ORG-002",
+
+    "name": "Agile Cloud Tech Startup",
+
+    "sector": "Technology",
+
+    "risk_appetite": "High",
+
+    "exposure": "internet-facing",
+
+    "service_importance": "High",
+
+    "weight_modifiers": {
+
+      "cvss_weight": 0.2,
+
+      "cisa_kev_weight": 0.2,
+
+      "first_epss_weight": 0.6
+
+    },
+
+    "critical_products": [
+
+      "Cloud Database Engine",
+
+      "Web Application Firewall"
+
+    ],
+
+    "business_services": {
+
+      "Cloud Database Engine": "product database",
+
+      "Web Application Firewall": "public web application edge"
+
+    }
+
+  },
+
+  {
+
+    "org_id": "ORG-003",
+
+    "name": "Municipal Utility Provider",
+
+    "sector": "Critical Infrastructure",
+
+    "risk_appetite": "Zero-Tolerance",
+
+    "exposure": "internal",
+
+    "service_importance": "Critical",
+
+    "weight_modifiers": {
+
+      "cvss_weight": 0.5,
+
+      "cisa_kev_weight": 0.4,
+
+      "first_epss_weight": 0.1
+
+    },
+
+    "critical_products": [
+
+      "Embedded IoT Gateway",
+
+      "Enterprise Router OS"
+
+    ],
+
+    "business_services": {
+
+      "Embedded IoT Gateway": "metering / SCADA gateways",
+
+      "Enterprise Router OS": "core network routing infrastructure"
+
+    }
+
+  }
+
+];
+
+
+
+// Gold-set validation records: 5 CVEs with practitioner ranks
+
+window.GOLD_SET = [{"cve_id": "CVE-2025-1111", "product": "Core Banking Framework", "cvss": 9.8, "kev": true, "epss": 0.95, "rank_bank": 1, "rank_startup": 2}, {"cve_id": "CVE-2026-2222", "product": "Cloud Database Engine", "cvss": 7.5, "kev": false, "epss": 0.91, "rank_bank": 4, "rank_startup": 1}, {"cve_id": "CVE-2024-3333", "product": "Embedded IoT Gateway", "cvss": 9.0, "kev": true, "epss": 0.02, "rank_bank": 3, "rank_startup": 4}, {"cve_id": "CVE-2025-4444", "product": "Identity Provider SaaS", "cvss": 5.0, "kev": true, "epss": 0.45, "rank_bank": 2, "rank_startup": 3}, {"cve_id": "CVE-2024-5555", "product": "Enterprise Router OS", "cvss": 6.8, "kev": false, "epss": 0.0012, "rank_bank": 5, "rank_startup": 5}];
+
+
+
+// Documented alias table (mirrors server.py PRODUCT_ALIASES)
+
+window.PRODUCT_ALIASES = {"apache": "Apache HTTP Server", "apache httpd": "Apache HTTP Server", "apache http server": "Apache HTTP Server", "core banking framework": "Core Banking Framework", "core banking": "Core Banking Framework", "identity provider saas": "Identity Provider SaaS", "identity provider": "Identity Provider SaaS", "idp": "Identity Provider SaaS", "cloud database engine": "Cloud Database Engine", "cloud db": "Cloud Database Engine", "database engine": "Cloud Database Engine", "web application firewall": "Web Application Firewall", "waf": "Web Application Firewall", "embedded iot gateway": "Embedded IoT Gateway", "iot gateway": "Embedded IoT Gateway", "enterprise router os": "Enterprise Router OS", "router os": "Enterprise Router OS", "enterprise router": "Enterprise Router OS"};
+
+window.SNAPSHOT_DATE = "2025-11-01";
+
+</script>
+
+
+
+  <!-- ============================================================
+
+       INLINED APP.JS (frontend logic — mirrors server.py)
+
+       ============================================================ -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>/* =============================================================
+
+   NEX-CODE-SRIKERS · Frontend logic
+
+   Mirrors server.py scoring + renders PS-required explainability
+
+   ============================================================= */
+
+
+
+const ORG_ICONS = {
+
+  "Global Retail Bank": "🏦",
+
+  "Agile Cloud Tech Startup": "🚀",
+
+  "Municipal Utility Provider": "🌐",
+
+};
+
+const ORG_EMOJI_TAG = { "Global Retail Bank": "🛡️", "Agile Cloud Tech Startup": "⚡", "Municipal Utility Provider": "🏭" };
+
+
+
+// ---------- Element refs ----------
+
+const $ = (id) => document.getElementById(id);
+
+const elements = {
+
+  orgContainer: $("orgContainer"),
+
+  kevBanner: $("kevBanner"),
+
+  kevBannerTitle: $("kevBannerTitle"),
+
+  kevBannerText: $("kevBannerText"),
+
+  statsRow: $("statsRow"),
+
+  stMatched: $("stMatched"), stExcluded: $("stExcluded"), stSevere: $("stSevere"), stKev: $("stKev"),
+
+  toggleRow: $("toggleRow"), toggleBtn: $("toggleBtn"),
+
+  toggleLab: $("toggleLab"), toggleDesc: $("toggleDesc"),
+
+  vulnList: $("vulnList"), vulnLoading: $("vulnLoading"),
+
+  negBox: $("negBox"), negSummary: $("negSummary"), negList: $("negList"),
+
+  validationArea: $("validationArea"),
+
+  statusText: $("statusText"),
+
+  toast: $("toast"),
+
+  uploadModal: $("uploadModal"),
+
+  uploadBtn: $("uploadBtn"),
+
+  modalClose: $("modalClose"),
+
+  modalCancel: $("modalCancel"),
+
+  runTriage: $("runTriage"),
+
+  dropZone: $("dropZone"),
+
+  fileInput: $("fileInput"),
+
+  profileJson: $("profileJson"),
+
+  uploadError: $("uploadError"),
+
+};
+
+
+
+let currentOrg = null;
+
+let itView = false;          // false = Owner View (default)
+
+let currentResult = null;    // last loaded triage payload
+
+let currentNegatives = [];   // excluded vulns for "negative test" display
+
+
+
+// ---------- Scoring (mirror of server.py) ----------
+
+function exposureBoost(org) {
+
+  const e = (org && (org.exposure || "")).toString().toLowerCase();
+
+  return e.startsWith("internet") ? 8.0 : 0.0;
+
+}
+
+function importanceBoost(org) {
+
+  const i = (org && (org.service_importance || "")).toString().toLowerCase();
+
+  if (i === "critical") return 10.0;
+
+  if (i === "high") return 5.0;
+
+  return 0.0;
+
+}
+
+function weightedScore(v, w) {
+
+  const normCvss = v.cvss / 10.0;
+
+  const normKev = v.kev ? 1.0 : 0.0;
+
+  const normEpss = v.epss;
+
+  return w.cvss_weight * normCvss + w.cisa_kev_weight * normKev + w.first_epss_weight * normEpss;
+
+}
+
+function finalScore(v, org, w) {
+
+  const base = weightedScore(v, w) * 100.0;
+
+  return Math.max(0, Math.min(100, base + exposureBoost(org) + importanceBoost(org)));
+
+}
+
+function priorityLabel(s) {
+
+  if (s >= 80) return "URGENT";
+
+  if (s >= 65) return "High";
+
+  if (s >= 45) return "Medium";
+
+  return "Low";
+
+}
+
+function effortLabel(v) {
+
+  if (v.kev && v.cvss >= 9.0) return "High-Effort Remediation (~4-5+ hours)";
+
+  if (v.kev && v.cvss >= 7.0 && v.cvss <= 8.9) return "Standard Patch (~1-2 hours)";
+
+  if (!v.kev && v.epss >= 0.5) return "Standard Patch (~1-2 hours)";
+
+  return "Quick Fix (~15-30 minutes)";
+
+}
+
+function severityLabel(cvss) {
+
+  if (cvss >= 9.0) return "Critical";
+
+  if (cvss >= 7.0) return "High";
+
+  if (cvss >= 4.0) return "Medium";
+
+  return "Low";
+
+}
+
+function effortClass(label) {
+
+  if (label.startsWith("High")) return "effort-high";
+
+  if (label.startsWith("Standard")) return "effort-std";
+
+  return "effort-quick";
+
+}
+
+function severityColor(cvss) {
+
+  if (cvss >= 9.0) return "var(--crit)";
+
+  if (cvss >= 7.0) return "var(--high)";
+
+  if (cvss >= 4.0) return "var(--med)";
+
+  return "var(--low)";
+
+}
+
+function toTitle(s) {
+
+  return String(s).replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+
+}
+
+
+
+// Build visible contributing factors (mirror server)
+
+function buildFactors(v, org, w) {
+
+  const nc = v.cvss / 10.0;
+
+  return [
+
+    { signal: "CVSS severity", value: v.cvss.toFixed(1) + " / 10", contribution: +(w.cvss_weight * nc * 100).toFixed(1) },
+
+    { signal: "CISA KEV (confirmed exploited)", value: v.kev ? "Yes" : "No", contribution: +(w.cisa_kev_weight * (v.kev ? 1 : 0) * 100).toFixed(1) },
+
+    { signal: "EPSS (exploit probability)", value: (v.epss * 100).toFixed(1) + "% in 30 days", contribution: +(w.first_epss_weight * v.epss * 100).toFixed(1) },
+
+    { signal: "Internet exposure", value: toTitle(org.exposure || "internal"), contribution: exposureBoost(org) },
+
+    { signal: "Service importance", value: toTitle(org.service_importance || "normal"), contribution: importanceBoost(org) },
+
+  ];
+
+}
+
+function whyItMatters(v, org) {
+
+  const sev = severityLabel(v.cvss);
+
+  const parts = [];
+
+  if (v.kev) parts.push("it is already being exploited in the wild (on CISA's Known Exploited Vulnerabilities list)");
+
+  if (v.epss >= 0.5) parts.push("there is a " + (v.epss * 100).toFixed(0) + "% chance it will be exploited in the next 30 days");
+
+  parts.push("its technical severity is " + v.cvss.toFixed(1) + "/10 (" + sev.toLowerCase() + ")");
+
+  if (exposureBoost(org)) parts.push("the affected service is internet-facing");
+
+  if (importanceBoost(org)) parts.push("it touches a " + (org.service_importance || "").toString().toLowerCase() + " service");
+
+  return "This vulnerability matters to " + (org.name || "your organisation") + " because " + parts.join("; ") + ".";
+
+}
+
+function potentialImpact(v, businessService) {
+
+  const sev = severityLabel(v.cvss);
+
+  let base = "A " + sev.toLowerCase() + " flaw (CVSS " + v.cvss.toFixed(1) + ") in " + v.product + ". ";
+
+  base += v.kev
+
+    ? "Because it is confirmed exploited, a successful attack could compromise "
+
+    : "If left unaddressed, it could compromise ";
+
+  return base + (businessService || "an affected business service") + ".";
+
+}
+
+function nextStep(v, needsVer) {
+
+  if (needsVer) return "Verify the installed version against the vendor advisory, then review vendor guidance before patching.";
+
+  if (v.kev) return "Patch or apply the vendor's mitigation immediately — this is already being exploited in the wild.";
+
+  if (v.epss >= 0.5) return "Prioritise patching in the next cycle and monitor logs for signs of exploitation.";
+
+  return "Schedule a routine security patch and continue monitoring.";
+
+}
+
+function confidenceLevel(v, needsVer) {
+
+  if (needsVer) return ["Low", "Version could not be compared — match needs human verification"];
+
+  if (v.cvss >= 4.0) return ["High", "Product match is exact and the record is complete"];
+
+  return ["Medium", "Lower-severity record; treat as context, not urgent"];
+
+}
+
+
+
+// Enrich a raw vuln into a full result object (used for offline fallback)
+
+function enrich(v, org, w, businessService) {
+
+  const needsVer = true; // data pack carries no version bounds
+
+  const score = finalScore(v, org, w);
+
+  const [conf, confReason] = confidenceLevel(v, needsVer);
+
+  return {
+
+    cve_id: v.cve_id,
+
+    product: v.product,
+
+    cvss: v.cvss,
+
+    kev: v.kev,
+
+    epss: v.epss,
+
+    score: +score.toFixed(1),
+
+    priority: priorityLabel(score),
+
+    severity: severityLabel(v.cvss),
+
+    effort: effortLabel(v),
+
+    factors: buildFactors(v, org, w),
+
+    why_it_matters: whyItMatters(v, org),
+
+    potential_impact: potentialImpact(v, businessService || "an affected business service"),
+
+    next_step: nextStep(v, needsVer),
+
+    needs_verification: needsVer,
+
+    confidence: conf,
+
+    confidence_reason: confReason,
+
+    business_service: businessService || "an affected business service",
+
+    source_name: "NIST NVD · CISA KEV · FIRST EPSS",
+
+    source_snapshot_date: "2025-11-01",
+
+    reference_url: "https://nvd.nist.gov/vuln/detail/" + v.cve_id,
+
+  };
+
+}
+
+
+
+// ---------- Owner-view plain-language helpers ----------
+
+function productBusiness(product) {
+
+  const map = {
+
+    "Core Banking Framework": "your core banking system",
+
+    "Identity Provider SaaS": "your identity & login service",
+
+    "Cloud Database Engine": "your cloud database",
+
+    "Web Application Firewall": "your web application firewall",
+
+    "Embedded IoT Gateway": "your IoT gateway devices",
+
+    "Enterprise Router OS": "your network routers / enterprise OS",
+
+  };
+
+  return map[product] || ("a business service built on " + product);
+
+}
+
+function sourceLabel(v) {
+
+  const yr = v.cve_id ? v.cve_id.split("-")[1] : "2025";
+
+  const kevSrc = v.kev ? " · CISA KEV" : "";
+
+  return `NIST NVD · ${yr} snapshot${kevSrc}`;
+
+}
+
+function sourceColor(v) { return v.kev ? "#ef4444" : "var(--muted)"; }
+
+
+
+// ---------- Rendering ----------
+
+function renderThreatFeed() {
+
+  const el = document.getElementById("threatFeed");
+
+  if (!el || !window.VULNERABILITIES) return;
+
+  const items = window.VULNERABILITIES
+
+    .filter((v) => v.kev || v.epss >= 0.5)
+
+    .sort((a, b) => (b.kev - a.kev) || (b.epss - a.epss))
+
+    .slice(0, 12);
+
+  if (!items.length) { el.innerHTML = '<div class="empty">No active threats in snapshot.</div>'; return; }
+
+  el.innerHTML = items.map((v, i) => {
+
+    const tag = v.kev
+
+      ? '<span class="tf-tag tf-kev">KEV</span>'
+
+      : `<span class="tf-tag tf-epss">EPSS ${(v.epss*100).toFixed(0)}%</span>`;
+
+    return `<div class="tf-item" style="animation-delay:${i*0.03}s"><span class="tf-cve">${v.cve_id}</span><span class="tf-prod">${v.product}</span>${tag}</div>`;
+
+  }).join("");
+
+}
+
+
+
+function renderOrgSelector() {
+
+  if (!window.ORGANIZATIONS) { elements.orgContainer.innerHTML = '<div class="empty">Organisation data not found.</div>'; return; }
+
+  elements.orgContainer.innerHTML = "";
+
+  window.ORGANIZATIONS.forEach((org) => {
+
+    const card = document.createElement("div");
+
+    card.className = "org-card" + (currentOrg === org.org_id ? " active" : "");
+
+    card.dataset.orgId = org.org_id;
+
+
+
+    const riskClass = org.risk_appetite === "Low" ? "tag-risk-low"
+
+      : org.risk_appetite === "High" ? "tag-risk-high" : "tag-risk-zero";
+
+    const exp = (org.exposure || "").toLowerCase().startsWith("internet");
+
+    const imp = (org.service_importance || "").toLowerCase();
+
+    const impPct = imp === "critical" ? 100 : imp === "high" ? 60 : 30;
+
+    const expLabel = exp ? "Internet-facing" : "Internal";
+
+    const expPct = exp ? 100 : 35;
+
+
+
+    // SVG risk dial (risk appetite → angle)
+
+    const appetiteScore = org.risk_appetite === "Low" ? 0.85 : org.risk_appetite === "High" ? 0.4 : 0.6;
+
+    const ang = (appetiteScore * 270 - 135) * Math.PI / 180;
+
+    const cx = 30, cy = 30, r = 22;
+
+    const nx = (cx + r * Math.cos(ang)).toFixed(1), ny = (cy + r * Math.sin(ang)).toFixed(1);
+
+
+
+    const chips = org.critical_products.map(p => `<span class="o-chip">${p}</span>`).join("");
+
+
+
+    card.innerHTML = `
+
+      <div class="o-top">
+
+        <div class="o-emoji">${ORG_ICONS[org.name] || "🏢"}</div>
+
+        <svg class="o-dial" viewBox="0 0 60 60" width="56" height="56">
+
+          <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"
+
+            stroke-dasharray="103.6 34.5" transform="rotate(135 30 30)"></circle>
+
+          <circle cx="30" cy="30" r="22" fill="none" stroke="url(#dg-${org.org_id})" stroke-width="6"
+
+            stroke-linecap="round" stroke-dasharray="${(appetiteScore*103.6).toFixed(1)} 138"
+
+            transform="rotate(135 30 30)"></circle>
+
+          <line x1="30" y1="30" x2="${nx}" y2="${ny}" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+
+          <circle cx="30" cy="30" r="3" fill="#fff"/>
+
+          <defs><linearGradient id="dg-${org.org_id}" x1="0" y1="0" x2="1" y2="1">
+
+            <stop offset="0" stop-color="#a855f7"/><stop offset="1" stop-color="#06b6d4"/>
+
+          </linearGradient></defs>
+
+        </svg>
+
+      </div>
+
+      <h3>${org.name}</h3>
+
+      <div class="o-sector">${org.sector}</div>
+
+      <div class="o-meters">
+
+        <div class="o-meter"><span>Exposure</span><div class="m-bar"><i style="width:${expPct}%;background:${exp ? 'var(--crit)' : 'var(--low)'}"></i></div><b>${expLabel}</b></div>
+
+        <div class="o-meter"><span>Service importance</span><div class="m-bar"><i style="width:${impPct}%;background:var(--accent)"></i></div><b>${toTitle(imp)}</b></div>
+
+      </div>
+
+      <div class="o-chips">${chips}</div>
+
+      <span class="o-tag ${riskClass}">Risk appetite: ${org.risk_appetite}</span>
+
+    `;
+
+    card.addEventListener("click", () => selectOrg(org));
+
+    elements.orgContainer.appendChild(card);
+
+  });
+
+}
+
+
+
+function selectOrg(org) {
+
+  currentOrg = org.org_id;
+
+  document.querySelectorAll(".org-card").forEach((c) => c.classList.toggle("active", c.dataset.orgId === org.org_id));
+
+  // switch to triage view
+
+  showView("triage");
+
+  const tt = document.getElementById("triageTitle");
+
+  if (tt) tt.textContent = org.name + " — Prioritised Triage";
+
+  if (location.hash !== "#org=" + org.org_id) {
+
+    try { history.pushState(null, "", "#org=" + org.org_id); } catch (e) { location.hash = "org=" + org.org_id; }
+
+  }
+
+  loadTriage(org);
+
+}
+
+
+
+function showView(name) {
+
+  const home = document.getElementById("view-home");
+
+  const triage = document.getElementById("view-triage");
+
+  if (home) home.style.display = name === "home" ? "" : "none";
+
+  if (triage) triage.style.display = name === "triage" ? "" : "none";
+
+  window.scrollTo(0, 0);
+
+}
+
+
+
+// ---------- Data loading ----------
+
+async function api(url) {
+
+  const res = await fetch(url);
+
+  if (!res.ok) throw new Error("HTTP " + res.status);
+
+  return res.json();
+
+}
+
+
+
+async function loadTriage(org) {
+
+  elements.vulnLoading.style.display = "block";
+
+  elements.vulnLoading.textContent = "Analysing vulnerabilities for " + org.name + "…";
+
+  elements.vulnList.innerHTML = "";
+
+
+
+  let payload;
+
+  try {
+
+    payload = await api("/api/triage/" + org.org_id);
+
+  } catch (e) {
+
+    // Offline fallback: compute locally from embedded data
+
+    payload = localTriage(org);
+
+  }
+
+  currentResult = payload;
+
+  renderStats(payload);
+
+  renderKEVBanner(payload);
+
+  renderNegatives(payload, org);
+
+  renderPriorityMatrix(payload);
+
+  renderList(payload.top);
+
+  renderValidation(org);
+
+  showToggleRow();
+
+}
+
+
+
+function normProduct(name) {
+
+  if (!name) return "";
+
+  const k = name.toString().trim().toLowerCase();
+
+  return (window.PRODUCT_ALIASES && window.PRODUCT_ALIASES[k]) || k;
+
+}
+
+
+
+function localTriage(org) {
+
+  // Used only if the Flask server is unreachable (e.g. static Onslate deploy).
+
+  const w = org.weight_modifiers;
+
+  const critical = new Set(org.critical_products.map(normProduct));
+
+  const matched = window.VULNERABILITIES.filter((v) => critical.has(normProduct(v.product)));
+
+  const excluded = window.VULNERABILITIES.length - matched.length;
+
+  const busMap = org.business_services || {};
+
+  let top = matched.map((v) => enrich(v, org, w, busMap[v.product]));
+
+  top.sort((a, b) => (b.score - a.score) || (a.cve_id < b.cve_id ? -1 : 1));
+
+  top = top.slice(0, 5);
+
+  top.forEach((t, i) => (t.rank = i + 1));
+
+  const excl = window.VULNERABILITIES.filter((v) => !critical.has(v.product.toLowerCase()));
+
+  excl.sort((a, b) => b.cvss - a.cvss);
+
+  const neg = excl[0]
+
+    ? { cve_id: excl[0].cve_id, product: excl[0].product, cvss: excl[0].cvss, kev: excl[0].kev, epss: excl[0].epss,
+
+        reason: `CVSS ${excl[0].cvss.toFixed(1)} is severe, but ${excl[0].product} is not in this organisation's technology stack, so it was excluded by personalisation.` }
+
+    : null;
+
+  return {
+
+    org: org.name, org_id: org.org_id, critical_products: org.critical_products,
+
+    total_vulns: window.VULNERABILITIES.length, matched: matched.length, excluded,
+
+    nothing_matched: matched.length === 0,
+
+    honest_message: matched.length === 0 ? "Nothing matched this profile in the supplied data." : "",
+
+    negative_test: neg, top,
+
+  };
+
+}
+
+
+
+function renderStats(p) {
+
+  const top = p.top;
+
+  const sev = top.filter((v) => v.cvss >= 7.0).length;
+
+  const kev = top.filter((v) => v.kev).length;
+
+  elements.stMatched.textContent = p.matched;
+
+  elements.stExcluded.textContent = p.excluded;
+
+  elements.stSevere.textContent = sev + " / " + top.length;
+
+  elements.stKev.textContent = kev;
+
+  elements.statsRow.style.display = "grid";
+
+}
+
+
+
+function renderKEVBanner(p) {
+
+  const kevItems = p.top.filter((v) => v.kev);
+
+  if (kevItems.length > 0) {
+
+    elements.kevBannerTitle.textContent = kevItems.length + " of your top risks are actively exploited";
+
+    elements.kevBannerText.textContent = kevItems.map((v) => v.product).join(", ") + " — on CISA's Known Exploited Vulnerabilities list. Prioritise these immediately.";
+
+    elements.kevBanner.classList.add("show");
+
+  } else {
+
+    elements.kevBanner.classList.remove("show");
+
+  }
+
+}
+
+
+
+function renderNegatives(p, org) {
+
+  const neg = p.negative_test;
+
+  if (!neg) {
+
+    elements.negSummary.innerHTML = `<strong>Negative test — required proof of personalisation</strong><br><span style="font-size:12px;color:var(--muted)">No excluded high-severity example available.</span>`;
+
+    elements.negList.innerHTML = "";
+
+    elements.negBox.style.display = "block";
+
+    return;
+
+  }
+
+  elements.negSummary.innerHTML =
+
+    `<strong>Negative test — proof that personalisation is not just "sort by CVSS"</strong><br>` +
+
+    `<span style="font-size:12px;color:var(--muted)">` +
+
+    `${p.excluded.toLocaleString()} vulnerabilities filtered out. The most severe excluded item is shown below — ` +
+
+    `it scored high but was excluded because this organisation does not run that product.</span>`;
+
+
+
+  elements.negList.innerHTML = `
+
+    <div class="neg-row">
+
+      <div>
+
+        <span class="neg-prod">${neg.cve_id} · ${neg.product}</span>
+
+        <br><span style="font-size:11px;color:var(--low)">${neg.reason}</span>
+
+      </div>
+
+      <div style="text-align:right">
+
+        <span class="neg-cvss">CVSS ${neg.cvss.toFixed(1)}</span>
+
+        <br><span style="font-size:10px;color:var(--muted)">${neg.kev ? "⚠ KEV" : "EPSS " + (neg.epss * 100).toFixed(1) + "%"} · EXCLUDED</span>
+
+      </div>
+
+    </div>`;
+
+  elements.negBox.style.display = "block";
+
+}
+
+
+
+// ---------- Priority Matrix (3x3: CVSS severity x EPSS exploitability) ----------
+
+function matrixCol(epss) { if (epss >= 0.5) return "high"; if (epss >= 0.1) return "med"; return "low"; }
+
+function matrixRow(cvss) { if (cvss >= 7.0) return "high"; if (cvss >= 4.0) return "med"; return "low"; }
+
+function matrixDotColor(kev, cvss, epss) {
+
+  if (kev) return "#ef4444";
+
+  if (cvss >= 9.0) return "#f97316";
+
+  if (cvss >= 7.0) return "#eab308";
+
+  if (epss >= 0.5) return "#22d3ee";
+
+  return "#22c55e";
+
+}
+
+function renderPriorityMatrix(p) {
+
+  const el = document.getElementById("priorityMatrix");
+
+  if (!el || !p || !p.top) { if (el) el.style.display = "none"; return; }
+
+  const cells = { low: { low: [], med: [], high: [] }, med: { low: [], med: [], high: [] }, high: { low: [], med: [], high: [] } };
+
+  p.top.forEach(v => { cells[matrixRow(v.cvss)][matrixCol(v.epss)].push(v); });
+
+  const colOrder = ["low", "med", "high"], rowOrder = ["high", "med", "low"];
+
+  const colLabel = { low: "Low likelihood", med: "Medium likelihood", high: "High likelihood" };
+
+  const rowLabel = { high: "High / Critical", med: "Medium", low: "Low" };
+
+  let html = `<div class="matrix-grid">
+
+    <div class="matrix-corner"><span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">EPSS&nbsp;→<br>CVSS&nbsp;↓</span></div>`;
+
+  colOrder.forEach(c => {
+
+    html += `<div class="matrix-col-hdr"><span>${colLabel[c]}<br><small style="color:var(--accent-2);opacity:.7">${c === 'low' ? '<0.1' : c === 'med' ? '0.1–0.5' : '≥0.5'}</small></span></div>`;
+
+  });
+
+  rowOrder.forEach(r => {
+
+    html += `<div class="matrix-row-hdr"><span>${rowLabel[r]}<br><small style="color:var(--accent);opacity:.7">${r === 'high' ? '≥7.0' : r === 'med' ? '4–6.9' : '<4'}</small></span></div>`;
+
+    colOrder.forEach(c => {
+
+      const items = cells[r][c];
+
+      html += `<div class="matrix-cell">`;
+
+      if (items.length === 0) { html += `<span class="mex" style="color:var(--border)">—</span>`; }
+
+      else { items.forEach(v => {
+
+        const color = matrixDotColor(v.kev, v.cvss, v.epss);
+
+        const label = itView ? v.cve_id : `#${p.top.indexOf(v) + 1}`;
+
+        html += `<div class="matrix-dot" style="background:${color}22;color:${color};border:1px solid ${color}55" title="${v.product} · CVSS ${v.cvss} · EPSS ${(v.epss * 100).toFixed(1)}%${v.kev ? ' · KEV' : ''}">` +
+
+          `<span class="matrix-dot-inner" style="background:${color}"></span>${label}</div>`;
+
+      }); }
+
+      html += `</div>`;
+
+    });
+
+  });
+
+  html += `</div><div class="matrix-legend">
+
+      <span><span class="matrix-dot-inner" style="background:#ef4444;display:inline-block;width:8px;height:8px;border-radius:50%"></span> Actively exploited (KEV)</span>
+
+      <span><span class="matrix-dot-inner" style="background:#f97316;display:inline-block;width:8px;height:8px;border-radius:50%"></span> Critical (CVSS ≥9)</span>
+
+      <span><span class="matrix-dot-inner" style="background:#eab308;display:inline-block;width:8px;height:8px;border-radius:50%"></span> High (CVSS 7–8.9)</span>
+
+      <span><span class="matrix-dot-inner" style="background:#22d3ee;display:inline-block;width:8px;height:8px;border-radius:50%"></span> High EPSS (≥50%)</span>
+
+      <span><span class="matrix-dot-inner" style="background:#22c55e;display:inline-block;width:8px;height:8px;border-radius:50%"></span> Standard</span>
+
+    </div>`;
+
+  el.innerHTML = html;
+
+  el.style.display = "block";
+
+}
+
+
+
+// ---------- Vulnerability list ----------
+
+// Two genuinely different personas:
+
+//   * Owner View  -> plain language, no CVE IDs / raw scores, business framing
+
+//   * IT View     -> full technical detail: CVE, score breakdown, CVSS bar, sources
+
+function renderList(top) {
+
+  elements.vulnList.innerHTML = "";
+
+  elements.vulnLoading.style.display = "none";
+
+
+
+  if (!top || top.length === 0) {
+
+    const honest = currentResult && currentResult.honest_message
+
+      ? currentResult.honest_message
+
+      : "No matching vulnerabilities found for this organisation.";
+
+    elements.vulnList.innerHTML = '<div class="empty">' + honest + '</div>';
+
+    return;
+
+  }
+
+
+
+  top.forEach((v, idx) => {
+
+    const item = document.createElement("div");
+
+    item.className = "vuln-item";
+
+    item.style.animationDelay = (idx * 0.06) + "s";
+
+
+
+    if (itView) {
+
+      item.innerHTML = renderItCard(v, idx);
+
+    } else {
+
+      item.innerHTML = renderOwnerCard(v, idx);
+
+    }
+
+    elements.vulnList.appendChild(item);
+
+  });
+
+}
+
+
+
+// ---- OWNER VIEW: plain language for non-technical decision-makers ----
+
+function renderOwnerCard(v, idx) {
+
+  const rankClass = "rank-" + (idx + 1);
+
+  const priClass = "pri-" + (v.priority || priorityLabel(v.score)).toLowerCase();
+
+  const effClass = effortClass(v.effort);
+
+  const color = severityColor(v.cvss);
+
+  const sev = severityLabel(v.cvss);
+
+  const kevBadge = v.kev ? `<span class="badge-kev">⚠ Actively exploited</span>` : "";
+
+  const verBadge = v.needs_verification ? `<span class="badge-verify">🔎 Verify version</span>` : "";
+
+  const businessTerm = productBusiness(v.product);
+
+  // Consequence-first plain sentence (no jargon)
+
+  const consequence = v.kev
+
+    ? `A weakness in ${businessTerm} is already being attacked in the real world.`
+
+    : `A weakness in ${businessTerm} could let attackers disrupt it.`;
+
+  const urgencyWord = v.priority === "URGENT" ? "Act this week"
+
+    : v.priority === "High" ? "Act soon"
+
+    : v.priority === "Medium" ? "Plan a fix" : "Schedule when convenient";
+
+
+
+  return `
+
+    <div class="rank-badge ${rankClass}">${idx + 1}</div>
+
+    <div class="vuln-main">
+
+      <div class="vuln-head">
+
+        <span class="prod">${businessTerm}</span>
+
+        <span class="pri ${priClass}">${v.priority || priorityLabel(v.score)}</span>
+
+        ${kevBadge}${verBadge}
+
+      </div>
+
+
+
+      <div class="owner-plain">
+
+        <p class="owner-consequence">${consequence}</p>
+
+        <p class="owner-why">${v.why_it_matters}</p>
+
+        <p class="owner-impact"><b>If ignored:</b> ${v.potential_impact}</p>
+
+      </div>
+
+
+
+      <div class="owner-foot">
+
+        <span class="effort-badge ${effClass}">⏱ ${v.effort}</span>
+
+        <span class="owner-urgency">${urgencyWord}</span>
+
+        <span class="owner-confidence">Confidence: ${v.confidence}</span>
+
+      </div>
+
+
+
+      <div class="owner-next">
+
+        <span class="rl-label">Recommended action</span>
+
+        <span>${v.next_step}</span>
+
+      </div>
+
+    </div>`;
+
+}
+
+
+
+// ---- IT WORKER VIEW: full technical detail ----
+
+function renderItCard(v, idx) {
+
+  const rankClass = "rank-" + (idx + 1);
+
+  const sevClass = "sev-" + severityLabel(v.cvss).toLowerCase();
+
+  const priClass = "pri-" + (v.priority || priorityLabel(v.score)).toLowerCase();
+
+  const effClass = effortClass(v.effort);
+
+  const color = severityColor(v.cvss);
+
+  const kevBadge = v.kev ? `<span class="badge-kev">⚠ KEV · ACTIVE</span>` : "";
+
+  const verBadge = v.needs_verification ? `<span class="badge-verify">🔎 NEEDS VERIFICATION</span>` : "";
+
+
+
+  const factorRows = (v.factors || []).map(f =>
+
+    `<tr><td>${f.signal}</td><td>${f.value}</td><td class="fac-val">+${f.contribution}</td></tr>`
+
+  ).join("");
+
+
+
+  const sourceLine =
+
+    `<div class="src-line">` +
+
+    `<span class="src-name">${v.source_name || sourceLabel(v)}</span>` +
+
+    `<span class="src-date"> · snapshot ${v.source_snapshot_date || "2025-11-01"}</span>` +
+
+    `<a class="src-link" href="${v.reference_url || '#'}" target="_blank" rel="noopener">source ↗</a>` +
+
+    `</div>`;
+
+
+
+  return `
+
+    <div class="rank-badge ${rankClass}">${idx + 1}</div>
+
+    <div class="vuln-main">
+
+      <div class="vuln-head">
+
+        <span class="cve">${v.cve_id}</span>
+
+        <span class="prod">${v.product}</span>
+
+        <span class="sev ${sevClass}">${severityLabel(v.cvss)}</span>
+
+        <span class="pri ${priClass}">${v.priority || priorityLabel(v.score)}</span>
+
+        ${kevBadge}${verBadge}
+
+      </div>
+
+
+
+      <div class="it-metrics">
+
+        <div class="it-metric"><span class="im-l">CVSS</span><span class="im-v" style="color:${color}">${v.cvss.toFixed(1)}</span></div>
+
+        <div class="it-metric"><span class="im-l">EPSS</span><span class="im-v">${(v.epss * 100).toFixed(1)}%</span></div>
+
+        <div class="it-metric"><span class="im-l">KEV</span><span class="im-v">${v.kev ? "Yes" : "No"}</span></div>
+
+        <div class="it-metric"><span class="im-l">Priority</span><span class="im-v">${v.score}/100</span></div>
+
+      </div>
+
+
+
+      <div class="vuln-tech show">
+
+        <table class="breakdown">
+
+          <tr><th>Signal</th><th>Value</th><th>Contribution</th></tr>
+
+          ${factorRows}
+
+          <tr class="fac-total"><td colspan="2">Total priority score</td><td class="fac-val">${v.score}/100</td></tr>
+
+        </table>
+
+        ${sourceLine}
+
+        <div class="it-next"><b>Remediation:</b> ${v.next_step} <span class="effort-badge ${effClass}">${v.effort}</span></div>
+
+        <div class="it-confidence">Confidence: <b>${v.confidence}</b> — ${v.confidence_reason}</div>
+
+      </div>
+
+    </div>`;
+
+}
+
+
+
+// ---------- Validation ----------
+
+async function renderValidation(org) {
+
+  elements.validationArea.innerHTML = '<div class="loading"><div class="spinner"></div>Validating against practitioner ranking…</div>';
+
+  try {
+
+    const v = await api("/api/validate/" + org.org_id);
+
+    const block = document.createElement("div");
+
+    block.className = "vuln-item";
+
+    block.style.flexDirection = "column";
+
+
+
+    if (!v.all || v.all.total === 0) {
+
+      block.innerHTML = `
+
+        <div class="vuln-head">
+
+          <span class="sev sev-low">ℹ️</span>
+
+          <span class="prod" style="font-size:13.5px">Validation (gold-set) — ${v.note || "No practitioner gold ranks available for this organisation."}</span>
+
+        </div>`;
+
+      elements.validationArea.innerHTML = "";
+
+      elements.validationArea.appendChild(block);
+
+      return;
+
+    }
+
+
+
+    let html = `<div class="vuln-head">
+
+        <span style="font-size:15px">🏅</span>
+
+        <span class="prod">Ranking validated against practitioner expertise — <b style="color:${v.all.accuracy_pct >= 50 ? "var(--low)" : "var(--high)"}">${v.all.matches}/${v.all.total} matched (${v.all.accuracy_pct}%)</b></span>
+
+      </div>
+
+      <table class="breakdown">
+
+        <tr><th>Gold CVE</th><th>Product</th><th>Our rank</th><th>Practitioner rank</th><th>Match</th><th>Our score</th></tr>`;
+
+
+
+    v.all.items.forEach((it) => {
+
+      const match = it.our_rank === it.practitioner_rank;
+
+      html += `
+
+        <tr>
+
+          <td>${it.cve_id}</td><td>${it.product}</td>
+
+          <td>${it.our_rank}</td><td>${it.practitioner_rank}</td>
+
+          <td class="${match ? "match-y" : "match-n"}">${match ? "✓" : "✗"}</td>
+
+          <td>${it.our_score}</td>
+
+        </tr>`;
+
+    });
+
+    html += `</table>`;
+
+
+
+    const pa = v.product_applicable;
+
+    html += `
+
+      <div style="margin-top:6px">
+
+        <div class="vuln-head"><span class="sev sev-low">On your actual stack</span>
+
+          <span class="prod">${pa.matches}/${pa.total} matched (${pa.accuracy_pct}%)</span>
+
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">${pa.note}</div>
+
+      </div>`;
+
+
+
+    html += `<div style="font-size:12px;color:var(--muted);margin-top:12px;border-top:1px dashed var(--border);padding-top:10px">${v.note}</div>`;
+
+
+
+    block.innerHTML = html;
+
+    elements.validationArea.innerHTML = "";
+
+    elements.validationArea.appendChild(block);
+
+  } catch (e) {
+
+    elements.validationArea.innerHTML = '<div class="empty">Validation unavailable: ' + e.message + "</div>";
+
+  }
+
+}
+
+
+
+// ---------- Toggle ----------
+
+function showToggleRow() { elements.toggleRow.style.display = "flex"; }
+
+function setView(isIt) {
+
+  itView = isIt;
+
+  elements.toggleBtn.classList.toggle("on", !isIt);
+
+  if (!isIt) {
+
+    elements.toggleLab.textContent = "Owner View";
+
+    elements.toggleDesc.textContent = "Plain language, for decision-makers";
+
+  } else {
+
+    elements.toggleLab.textContent = "IT Worker View";
+
+    elements.toggleDesc.textContent = "CVE IDs, exact scores & breakdowns";
+
+  }
+
+  if (currentResult) renderList(currentResult.top);
+
+}
+
+elements.toggleBtn.addEventListener("click", () => setView(!itView));
+
+
+
+// ---------- Toast ----------
+
+let toastTimer;
+
+function toast(msg) {
+
+  elements.toast.textContent = msg;
+
+  elements.toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => elements.toast.classList.remove("show"), 2600);
+
+}
+
+
+
+// ---------- Upload Modal ----------
+
+function openUploadModal() {
+
+  elements.uploadModal.style.display = "flex";
+
+  elements.uploadError.style.display = "none";
+
+  elements.uploadError.textContent = "";
+
+  elements.profileJson.value = "";
+
+  elements.fileInput.value = "";
+
+}
+
+function closeUploadModal() { elements.uploadModal.style.display = "none"; elements.uploadError.style.display = "none"; }
+
+function showUploadError(msg) { elements.uploadError.textContent = msg; elements.uploadError.style.display = "block"; }
+
+
+
+function handleFileContent(content) { elements.profileJson.value = content; }
+
+
+
+function validateProfileJson(text) {
+
+  if (!text.trim()) { showUploadError("Please paste a JSON profile or upload a file."); return null; }
+
+  try {
+
+    const data = JSON.parse(text);
+
+    if (!Array.isArray(data.critical_products) || data.critical_products.length === 0) {
+
+      showUploadError("Missing or empty field: critical_products must be a non-empty list.");
+
+      return null;
+
+    }
+
+    return data;
+
+  } catch (e) { showUploadError("Invalid JSON: " + e.message); return null; }
+
+}
+
+
+
+async function runCustomTriage() {
+
+  const jsonText = elements.profileJson.value;
+
+  const profile = validateProfileJson(jsonText);
+
+  if (!profile) return;
+
+  elements.runTriage.disabled = true;
+
+  elements.runTriage.textContent = "Running…";
+
+  try {
+
+    const res = await fetch("/api/triage-custom", {
+
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile),
+
+    });
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const payload = await res.json();
+
+    closeUploadModal();
+
+    renderCustomResult(payload, profile);
+
+  } catch (e) {
+
+    // Offline fallback: compute locally from embedded data.js (works in file:// mode)
+
+    if (window.VULNERABILITIES && window.VULNERABILITIES.length) {
+
+      const payload = localTriageForProfile(profile);
+
+      closeUploadModal();
+
+      renderCustomResult(payload, profile);
+
+      toast("Ran locally (offline mode) — for full validation run the server.");
+
+    } else {
+
+      showUploadError("Could not reach the server and no offline data is available. Run 'python server.py' first.");
+
+    }
+
+  } finally { elements.runTriage.disabled = false; elements.runTriage.textContent = "▶ Run Triage"; }
+
+}
+
+
+
+// Local triage for an arbitrary (unseen) profile, using embedded data.js
+
+function localTriageForProfile(profile) {
+
+  const defaults = { cvss_weight: 0.3, cisa_kev_weight: 0.45, first_epss_weight: 0.25 };
+
+  const w = Object.assign({}, defaults, profile.weight_modifiers || {});
+
+  for (const k in w) w[k] = parseFloat(w[k]);
+
+  const org = {
+
+    org_id: "CUSTOM", name: profile.name || "Custom Organisation",
+
+    exposure: profile.exposure || "internal", service_importance: profile.service_importance || "normal",
+
+    critical_products: profile.critical_products || [], weight_modifiers: w,
+
+    business_services: profile.business_services || {},
+
+  };
+
+  const critical = new Set(org.critical_products.map(normProduct));
+
+  const matched = window.VULNERABILITIES.filter((v) => critical.has(normProduct(v.product)));
+
+  let top = matched.map((v) => enrich(v, org, w, (org.business_services || {})[v.product]));
+
+  top.sort((a, b) => (b.score - a.score) || (a.cve_id < b.cve_id ? -1 : 1));
+
+  top = top.slice(0, 5);
+
+  top.forEach((t, i) => (t.rank = i + 1));
+
+  const excl = window.VULNERABILITIES.filter((v) => !critical.has(normProduct(v.product)));
+
+  excl.sort((a, b) => b.cvss - a.cvss);
+
+  const neg = excl[0]
+
+    ? { cve_id: excl[0].cve_id, product: excl[0].product, cvss: excl[0].cvss, kev: excl[0].kev, epss: excl[0].epss,
+
+        reason: `CVSS ${excl[0].cvss.toFixed(1)} is severe, but ${excl[0].product} is not in this organisation's technology stack, so it was excluded by personalisation.` }
+
+    : null;
+
+  return {
+
+    org: org.name, org_id: "CUSTOM", critical_products: org.critical_products,
+
+    total_vulns: window.VULNERABILITIES.length, matched: matched.length, excluded: window.VULNERABILITIES.length - matched.length,
+
+    nothing_matched: matched.length === 0,
+
+    honest_message: matched.length === 0 ? "Nothing matched this profile in the supplied data." : "",
+
+    negative_test: neg, top,
+
+  };
+
+}
+
+
+
+function renderCustomResult(payload, profile) {
+
+  currentOrg = "CUSTOM";
+
+  currentResult = payload;
+
+  const fakeOrg = { critical_products: payload.critical_products, name: payload.org, exposure: payload.exposure, service_importance: payload.service_importance };
+
+  document.querySelectorAll(".org-card").forEach((c) => c.classList.remove("active"));
+
+  // switch to triage view so the result is actually visible
+
+  showView("triage");
+
+  const tt = document.getElementById("triageTitle");
+
+  if (tt) tt.textContent = "Custom Profile — " + payload.org;
+
+  // ensure a custom-profile summary card sits at the top of the results
+
+  const summary = document.getElementById("customSummary");
+
+  if (summary) {
+
+    summary.style.display = "block";
+
+    summary.innerHTML = `
+
+      <div class="vuln-item" style="flex-direction:column">
+
+        <div class="vuln-head">
+
+          <span style="font-size:15px">📁</span>
+
+          <span class="prod">Custom profile: <b>${payload.org}</b></span>
+
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">
+
+          Exposure: ${payload.exposure} &nbsp;·&nbsp; Service importance: ${payload.service_importance} &nbsp;·&nbsp; Products: ${payload.critical_products.join(", ")}
+
+        </div>
+
+      </div>`;
+
+  }
+
+  renderStats(payload);
+
+  renderKEVBanner(payload);
+
+  renderNegatives(payload, fakeOrg);
+
+  renderPriorityMatrix(payload);
+
+  renderList(payload.top);
+
+  showToggleRow();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  toast("Triage complete for " + payload.org);
+
+}
+
+
+
+// Event listeners
+
+elements.uploadBtn.addEventListener("click", openUploadModal);
+
+elements.modalClose.addEventListener("click", closeUploadModal);
+
+elements.modalCancel.addEventListener("click", closeUploadModal);
+
+elements.runTriage.addEventListener("click", runCustomTriage);
+
+elements.uploadModal.addEventListener("click", (e) => { if (e.target === elements.uploadModal) closeUploadModal(); });
+
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && elements.uploadModal.style.display !== "none") closeUploadModal(); });
+
+elements.dropZone.addEventListener("dragover", (e) => { e.preventDefault(); elements.dropZone.classList.add("drag-over"); });
+
+elements.dropZone.addEventListener("dragleave", () => elements.dropZone.classList.remove("drag-over"));
+
+elements.dropZone.addEventListener("drop", (e) => { e.preventDefault(); elements.dropZone.classList.remove("drag-over"); const f = e.dataTransfer.files[0]; if (f) readFile(f); });
+
+elements.fileInput.addEventListener("change", (e) => { const f = e.target.files[0]; if (f) readFile(f); });
+
+
+
+function readFile(file) {
+
+  if (file.name.endsWith(".csv") || file.type === "text/csv") { uploadCsv(file); return; }
+
+  if (!file.name.endsWith(".json") && file.type !== "application/json") { showUploadError("Only .json and .csv files are accepted."); return; }
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => handleFileContent(e.target.result);
+
+  reader.onerror = () => showUploadError("Failed to read file.");
+
+  reader.readAsText(file);
+
+}
+
+
+
+async function uploadCsv(file) {
+
+  elements.runTriage.disabled = true;
+
+  elements.runTriage.textContent = "Uploading CSV…";
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  try {
+
+    const res = await fetch("/api/triage-csv-upload", { method: "POST", body: formData });
+
+    if (!res.ok) { const err = await res.json().catch(() => ({ error: "HTTP " + res.status })); showUploadError(err.error || "CSV upload failed."); return; }
+
+    const payload = await res.json();
+
+    closeUploadModal();
+
+    renderCustomResult(payload, { name: payload.org });
+
+  } catch (e) { showUploadError("Network error: " + e.message); }
+
+  finally { elements.runTriage.disabled = false; elements.runTriage.textContent = "▶ Run Triage"; }
+
+}
+
+
+
+// ---------- 3D HERO (Three.js network sphere) ----------
+
+function initHero3D() {
+
+  const canvas = document.getElementById("hero3d");
+
+  if (!canvas || typeof THREE === "undefined") return; // graceful skip if offline
+
+  try {
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(60, 2, 0.1, 1000);
+
+    camera.position.z = 230;
+
+
+
+    const group = new THREE.Group();
+
+    scene.add(group);
+
+
+
+    // Build nodes on a sphere (Fibonacci distribution)
+
+    const N = 90;
+
+    const R = 120;
+
+    const positions = [];
+
+    const pts = [];
+
+    const golden = Math.PI * (3 - Math.sqrt(5));
+
+    for (let i = 0; i < N; i++) {
+
+      const y = 1 - (i / (N - 1)) * 2;
+
+      const r = Math.sqrt(1 - y * y);
+
+      const theta = golden * i;
+
+      const x = Math.cos(theta) * r;
+
+      const z = Math.sin(theta) * r;
+
+      positions.push(x * R, y * R, z * R);
+
+      pts.push(new THREE.Vector3(x * R, y * R, z * R));
+
+    }
+
+    const geo = new THREE.BufferGeometry();
+
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+
+    const pMat = new THREE.PointsMaterial({ color: 0xa855f7, size: 3.4, transparent: true, opacity: 0.95 });
+
+    group.add(new THREE.Points(geo, pMat));
+
+
+
+    // Connect nearby nodes with glowing cyan lines
+
+    const linePos = [];
+
+    for (let i = 0; i < pts.length; i++) {
+
+      for (let j = i + 1; j < pts.length; j++) {
+
+        if (pts[i].distanceTo(pts[j]) < R * 0.42) {
+
+          linePos.push(pts[i].x, pts[i].y, pts[i].z, pts[j].x, pts[j].y, pts[j].z);
+
+        }
+
+      }
+
+    }
+
+    const lgeo = new THREE.BufferGeometry();
+
+    lgeo.setAttribute("position", new THREE.Float32BufferAttribute(linePos, 3));
+
+    const lmat = new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.18 });
+
+    group.add(new THREE.LineSegments(lgeo, lmat));
+
+
+
+    // A few brighter "threat" nodes (pink)
+
+    const threatGeo = new THREE.BufferGeometry();
+
+    const tp = [];
+
+    for (let i = 0; i < 12; i++) {
+
+      const p = pts[Math.floor(Math.random() * pts.length)];
+
+      tp.push(p.x * 1.02, p.y * 1.02, p.z * 1.02);
+
+    }
+
+    threatGeo.setAttribute("position", new THREE.Float32BufferAttribute(tp, 3));
+
+    group.add(new THREE.Points(threatGeo, new THREE.PointsMaterial({ color: 0xec4899, size: 5.5 })));
+
+
+
+    function resize() {
+
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+
+      renderer.setSize(w, h, false);
+
+      camera.aspect = w / h;
+
+      camera.updateProjectionMatrix();
+
+    }
+
+    window.addEventListener("resize", resize);
+
+    resize();
+
+
+
+    (function animate() {
+
+      requestAnimationFrame(animate);
+
+      group.rotation.y += 0.0024;
+
+      group.rotation.x += 0.0009;
+
+      renderer.render(scene, camera);
+
+    })();
+
+  } catch (e) { /* no-op: keep CSS hero if WebGL unavailable */ }
+
+}
+
+
+
+async function init() {
+
+  initHero3D();
+
+  renderThreatFeed();
+
+
+
+  // Nav links
+
+  document.querySelectorAll(".nav-link[data-view]").forEach((a) => {
+
+    a.addEventListener("click", (e) => { e.preventDefault(); showView("home"); });
+
+  });
+
+  const navUpload = document.getElementById("navUpload");
+
+  if (navUpload) navUpload.addEventListener("click", (e) => { e.preventDefault(); openUploadModal(); });
+
+
+
+  // Back button
+
+  const back = document.getElementById("backBtn");
+
+  if (back) back.addEventListener("click", () => {
+
+    try { history.pushState(null, "", location.pathname); } catch (e) {}
+
+    showView("home");
+
+  });
+
+
+
+  // Deep-link: ?org=ORG-XXX
+
+  const m = location.hash.match(/org=([^&]+)/);
+
+  let initialOrg = null;
+
+  if (m) {
+
+    try { window.ORGANIZATIONS = await api("/api/organizations"); } catch (e) {}
+
+    initialOrg = (window.ORGANIZATIONS || []).find((o) => o.org_id === m[1]);
+
+  } else {
+
+    try { window.ORGANIZATIONS = await api("/api/organizations"); } catch (e) {}
+
+  }
+
+
+
+  renderOrgSelector();
+
+  checkHealth();
+
+
+
+  if (initialOrg) { selectOrg(initialOrg); }
+
+}
+
+
+
+init();
+
+</script>
+
+
+
+</body>
+
+</html>
